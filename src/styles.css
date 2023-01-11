@@ -1,0 +1,37 @@
+@font-face {
+	font-family: Rubik;
+	src: url(../assets/Rubik.ttf);
+}
+
+html,
+body {
+	width: 100%;
+	padding: 0px;
+	margin: 0px;
+	background-color: #1E1E1E;
+    color: white;
+	font-family: Rubik;
+}
+
+.button {
+    background-color: #8B8B8B;
+    color: black;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 15px;
+    padding-right: 15px;
+    border-width: 0px;
+    border-radius: 15px;
+    transition: 300ms;
+}
+
+.button:hover {
+    background-color: #6e6e6e;
+}
+
+.form-select {
+    background-color: #8B8B8B;
+    border-width: 0px !important;
+    box-shadow: none !important;
+    border-radius: 15px;
+}

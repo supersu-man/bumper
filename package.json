@@ -1,0 +1,42 @@
+{
+  "name": "bumper",
+  "productName": "Bumper",
+  "version": "0.0.1",
+  "description": "A tool to bump version for android project.",
+  "main": "src/main.js",
+  "build": {
+    "appId": "com.supersuman.bumper",
+    "linux": {
+      "target": "deb"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "releaseType": "release"
+      }
+    ]
+  },
+  "scripts": {
+    "patch": "npm version patch &&  git push && git push --tags",
+    "minor": "npm version minor && git push && git push --tags",
+    "major": "npm version major && git push && git push --tags",
+    "start": "npx electron .",
+    "dist": "npx electron-builder"
+  },
+  "keywords": [
+    "Electron",
+    "Android",
+    "versioning"
+  ],
+  "author": "Sumanth Perambuduri <sumanthpera444@gmail.com>",
+  "license": "Apache License 2.0",
+  "devDependencies": {
+    "electron": "^22.0.0",
+    "electron-builder": "^23.6.0"
+  },
+  "dependencies": {
+    "bootstrap": "^5.2.3",
+    "electron-store": "^8.1.0",
+    "electron-updater": "^5.3.0"
+  }
+}
