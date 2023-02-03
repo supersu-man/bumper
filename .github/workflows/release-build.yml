@@ -1,9 +1,9 @@
-name: Build/test
+name: Build/release
 
-on: 
-  push: 
-    branches:
-      - '**'
+on:
+  push:
+    tags:
+      - 'v*'
 
 jobs:
   release:
@@ -17,17 +17,6 @@ jobs:
       - name: Check out Git repository
         uses: actions/checkout@v3
 
-      - name: Install Node.js, NPM and Yarn
-        uses: actions/setup-node@v3.6.0
-        with:
-          node-version: 18
-
-      - name: Build/release Electron app
-        uses: samuelmeuli/action-electron-builder@v1.6.0
-        with:
-          args: "-p never"
-          github_token: ${{ secrets.github_token }}
-
       - name: Build Changelog
         id: changelog
         uses: ardalanamini/auto-changelog@v3
@@ -36,3 +25,25 @@ jobs:
           mention-new-contributors: false
           include-compare: false
           semver: false
+
+      - name: Install Node.js, NPM and Yarn
+        uses: actions/setup-node@v3.6.0
+        with:
+          node-version: 18
+
+      - name: Build/Release Electron app
+        uses: samuelmeuli/action-electron-builder@v1.6.0
+        with:
+          args: "-c.snap.publish=github"
+          github_token: ${{ secrets.github_token }}
+          release: ${{ startsWith(github.ref, 'refs/tags/v') }}
+
+      - name: Update release
+        if: matrix.os == 'ubuntu-latest'
+        id: update_release
+        uses: tubone24/update_release@v1.3.1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          release_name: Release ${{github.ref_name}}
+          body: ${{ steps.changelog.outputs.changelog }} &#x20;
