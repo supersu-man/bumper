@@ -35,4 +35,4 @@ jobs:
           mention-authors: false
           mention-new-contributors: false
           include-compare: false
-          semver: false}
+          semver: false
