@@ -1,12 +1,6 @@
 const { app, BrowserWindow } = require('electron')
 const path = require('path')
 const { ipcMain, dialog } = require("electron")
-const { autoUpdater } = require("electron-updater")
-autoUpdater.checkForUpdatesAndNotify()
-
-try {
-  require('electron-reloader')(module)
-} catch { }
 
 function createWindow() {
   const mainWindow = new BrowserWindow({

@@ -1,12 +1,12 @@
-name: Build/test
+name: Test
 
-on: 
-  push: 
+on:
+  push:
     branches:
-      - '**'
+    - main
 
 jobs:
-  release:
+  test:
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -18,21 +18,9 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Install Node.js, NPM and Yarn
-        uses: actions/setup-node@v3.6.0
+        uses: actions/setup-node@v3
         with:
           node-version: 18
 
-      - name: Build/release Electron app
-        uses: coparse-inc/action-electron-builder@v1.0.0
-        with:
-          args: "-p never"
-          github_token: ${{ secrets.github_token }}
-
-      - name: Build Changelog
-        id: changelog
-        uses: ardalanamini/auto-changelog@v3
-        with:
-          mention-authors: false
-          mention-new-contributors: false
-          include-compare: false
-          semver: false
+      - run: npm install
+      - run: npm run make
