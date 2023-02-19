@@ -4,6 +4,7 @@
   "version": "0.0.3",
   "description": "A tool to bump version for android project.",
   "main": "src/main.js",
+  "repository": "github:supersu-man/bumper",
   "scripts": {
     "start": "electron-forge start",
     "package": "electron-forge package",
@@ -29,6 +30,7 @@
   "dependencies": {
     "bootstrap": "^5.2.3",
     "electron-squirrel-startup": "^1.0.0",
-    "electron-store": "^8.1.0"
+    "electron-store": "^8.1.0",
+    "update-electron-app": "^2.0.1"
   }
 }
