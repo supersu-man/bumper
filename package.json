@@ -1,7 +1,7 @@
 {
   "name": "bumper",
   "productName": "bumper",
-  "version": "0.0.3",
+  "version": "1.0.0",
   "description": "A tool to bump version for android project.",
   "main": "src/main.js",
   "repository": "github:supersu-man/bumper",
