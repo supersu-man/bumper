@@ -1,40 +1,79 @@
 const { app, BrowserWindow } = require('electron')
 const path = require('path')
-const { ipcMain, dialog } = require("electron")
 
-function createWindow() {
+if (require('electron-squirrel-startup')) app.quit()
+
+const createWindow = () => {
   const mainWindow = new BrowserWindow({
     width: 800,
     height: 500,
     resizable: false,
     icon: path.join(__dirname, '../assets/icon.png'),
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
-      nodeIntegration: true
+      preload: path.join(__dirname, 'preload.js')
     }
   })
 
-  mainWindow.loadFile('src/index.html')
+  mainWindow.loadFile(path.join(__dirname, 'index.html'))
   mainWindow.removeMenu()
-  //mainWindow.webContents.openDevTools()
+  mainWindow.webContents.openDevTools()
 }
 
-app.whenReady().then(() => {
-  createWindow()
-  initIPC()
+app.on('ready', createWindow)
 
-  app.on('activate', function () {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
-  })
-})
-
-app.on('window-all-closed', function () {
+app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()
 })
 
-function initIPC() {
-  ipcMain.handle("showDialog", () => {
-    const path = dialog.showOpenDialog({ properties: ['openDirectory'] })
-    return path
-  })
-}
+app.on('activate', () => {
+  if (BrowserWindow.getAllWindows().length === 0) createWindow()
+})
+
+
+const { ipcMain, dialog } = require('electron')
+const fs = require('fs')
+const Store = require('electron-store')
+const store = new Store()
+const execSync = require('child_process').execSync
+
+ipcMain.handle('getPaths', () => {
+  if (!store.has('paths')) {
+    store.set('paths', JSON.stringify([]))
+  }
+  const json = store.get('paths')
+  return JSON.parse(json)
+})
+
+ipcMain.handle('addPath', () => {
+  const result = dialog.showOpenDialogSync({ properties: ['openDirectory'] })
+  const gradle = path.join(result[0], 'app', 'build.gradle')
+  if (!fs.existsSync(gradle)) return //gradle not found
+  const json = store.get('paths')
+  const paths = JSON.parse(json)
+  for (const iterator of paths) {
+    if (iterator.path == result[0]) return //path already exists
+  }
+  paths.push({ 'path': result[0] })
+  store.set('paths', JSON.stringify(paths))
+})
+
+ipcMain.handle('getContent', (event, projectPath) => {
+  const gradle = path.join(projectPath, 'app', 'build.gradle')
+  if (!fs.existsSync(gradle)) return
+  const content = fs.readFileSync(gradle, 'utf8')
+  return content
+})
+
+ipcMain.handle('bump', (event, projectPath, ar) => {
+  const gradle = path.join(projectPath, 'app', 'build.gradle')
+  var contents = fs.readFileSync(gradle, 'utf8')
+  contents = contents.replace(ar[0], ar[1])
+  contents = contents.replace(ar[2], ar[3])
+  fs.writeFileSync(gradle, contents)
+  const versionName = ar[3].split('"')[1]
+  execSync('git add -A', { cwd: projectPath })
+  execSync(`git commit -m v${versionName}`, { cwd: projectPath })
+  execSync(`git tag v${versionName}`, { cwd: projectPath })
+  execSync('git push', { cwd: projectPath })
+  execSync('git push --tags', { cwd: projectPath })
+})

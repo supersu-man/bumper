@@ -1,14 +1,15 @@
 {
   "name": "bumper",
-  "productName": "Bumper",
+  "productName": "bumper",
   "version": "0.0.3",
   "description": "A tool to bump version for android project.",
   "main": "src/main.js",
   "scripts": {
     "start": "electron-forge start",
-    "dist": "npx electron-builder",
     "package": "electron-forge package",
     "make": "electron-forge make",
+    "publish": "electron-forge publish",
+    "lint": "echo \"No linting configured\"",
     "patch": "npm version patch &&  git push && git push --tags",
     "minor": "npm version minor && git push && git push --tags",
     "major": "npm version major && git push && git push --tags"
