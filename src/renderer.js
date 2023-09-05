@@ -35,30 +35,30 @@ const dropdownMenu = document.getElementById('dropdown-menu')
 dropdownMenu.onchange = async () => {
     const projectPath = dropdownMenu.options[dropdownMenu.selectedIndex].value
     const content = await window.api.getContent(projectPath)
-    cVersionCode = /(versionCode [0-9]*)/.exec(content)?.at(0)
-    cVersionName = /(versionName ".*")/.exec(content)?.at(0)
+    cVersionCode = /(versionCode [0-9]+)/.exec(content)?.at(0) || /(versionCode = [0-9]+)/.exec(content)?.at(0)
+    cVersionName = /(versionName ".+")/.exec(content)?.at(0) || /(versionName = ".+")/.exec(content)?.at(0)
     setBumpMode('patch')
 }
 
 const setBumpMode = (mode) => {
-    const versionCode = cVersionCode.split('versionCode ')[1]
-    nVersionCode = 'versionCode ' + (parseInt(versionCode) + 1)
-    const versionName = cVersionName.split('"')[1]
-    const digits = versionName.split('.')
+    const oldVersionCode = /([0-9]+)/.exec(cVersionCode)[0]
+    nVersionCode = cVersionCode.replace(oldVersionCode, parseInt(oldVersionCode)+1)
+    const oldVersionName = /([0-9]+\.[0-9]+\.[0-9]+)/.exec(cVersionName)[0] || /([0-9]+\.[0-9]+)/.exec(cVersionName)[0]
+    const digits = oldVersionName.match(/[0-9]+/g)
     switch (digits.length) {
         case 2:
             if (mode == 'major')
-                nVersionName = `versionName "${(parseInt(digits[0]) + 1) + '.0'}"`
+                nVersionName = cVersionName.replace(oldVersionName, `${parseInt(digits[0])+1}.0`)
             if (mode == 'minor' || mode == 'patch')
-                nVersionName = `versionName "${digits[0] + '.' + (parseInt(digits[1]) + 1)}"`
+                nVersionName = cVersionName.replace(oldVersionName, `${digits[0]}.${parseInt(digits[1])+1}`)
             break
         case 3:
             if (mode == 'major')
-                nVersionName = `versionName "${(parseInt(digits[0]) + 1) + '.0.0'}"`
+                nVersionName = cVersionName.replace(oldVersionName, `${parseInt(digits[0])+1}.0.0`)
             if (mode == 'minor')
-                nVersionName = `versionName "${digits[0] + '.' + (parseInt(digits[1]) + 1) + '.0'}"`
+                nVersionName = cVersionName.replace(oldVersionName, `${digits[0]}.${parseInt(digits[1])+1}.0`)
             if (mode == 'patch')
-                nVersionName = `versionName "${digits[0] + '.' + digits[1] + '.' + (parseInt(digits[2]) + 1)}"`
+                nVersionName = cVersionName.replace(oldVersionName, `${digits[0]}.${digits[1]}.${parseInt(digits[2])+1}`)
     }
     updateUI()
 }

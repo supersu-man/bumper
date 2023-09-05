@@ -50,7 +50,8 @@ ipcMain.handle('getPaths', () => {
 ipcMain.handle('addPath', () => {
   const result = dialog.showOpenDialogSync({ properties: ['openDirectory'] })
   const gradle = path.join(result[0], 'app', 'build.gradle')
-  if (!fs.existsSync(gradle)) return //gradle not found
+  const gradleKt = path.join(result[0], 'app', 'build.gradle.kts')
+  if (!fs.existsSync(gradle) && !fs.existsSync(gradleKt)) return //gradle not found
   const json = store.get('paths')
   const paths = JSON.parse(json)
   for (const iterator of paths) {
@@ -62,18 +63,32 @@ ipcMain.handle('addPath', () => {
 
 ipcMain.handle('getContent', (event, projectPath) => {
   const gradle = path.join(projectPath, 'app', 'build.gradle')
-  if (!fs.existsSync(gradle)) return
-  const content = fs.readFileSync(gradle, 'utf8')
+  const gradleKt = path.join(projectPath, 'app', 'build.gradle.kts')
+  if (!fs.existsSync(gradle) && !fs.existsSync(gradleKt)) return
+  let content;
+  if (fs.existsSync(gradle)) content = fs.readFileSync(gradle, 'utf8')
+  if (fs.existsSync(gradleKt)) content = fs.readFileSync(gradleKt, 'utf8')
+  console.log(content)
   return content
 })
 
 ipcMain.handle('bump', (event, projectPath, ar) => {
   const gradle = path.join(projectPath, 'app', 'build.gradle')
-  var contents = fs.readFileSync(gradle, 'utf8')
-  contents = contents.replace(ar[0], ar[1])
-  contents = contents.replace(ar[2], ar[3])
-  fs.writeFileSync(gradle, contents)
-  const versionName = ar[3].split('"')[1]
+  const gradleKt = path.join(projectPath, 'app', 'build.gradle.kts')
+  if (!fs.existsSync(gradle) && !fs.existsSync(gradleKt)) return
+  let content;
+  if (fs.existsSync(gradle)) {
+    content = fs.readFileSync(gradle, 'utf8')
+    content = content.replace(ar[0], ar[1]).replace(ar[2], ar[3])
+    fs.writeFileSync(gradle, content)
+  }
+  if (fs.existsSync(gradleKt)) {
+    content = fs.readFileSync(gradleKt, 'utf8')
+    content = content.replace(ar[0], ar[1]).replace(ar[2], ar[3])
+    fs.writeFileSync(gradleKt, content)
+  }
+  const versionName = /([0-9]+\.[0-9]+\.[0-9]+)/.exec(ar[3])[0] || /([0-9]+\.[0-9]+)/.exec(ar[3])[0]
+  console.log(content)
   execSync('git add -A', { cwd: projectPath })
   execSync(`git commit -m v${versionName}`, { cwd: projectPath })
   execSync(`git tag v${versionName}`, { cwd: projectPath })
