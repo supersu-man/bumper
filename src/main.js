@@ -1,7 +1,7 @@
 const { app, BrowserWindow } = require('electron')
 const path = require('path')
 
-require('update-electron-app')()
+require('update-electron-app').updateElectronApp()
 
 
 if (require('electron-squirrel-startup')) app.quit()
