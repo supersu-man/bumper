@@ -1,7 +1,10 @@
-var cVersionCode
-var cVersionName
-var nVersionCode
-var nVersionName
+import './styles.css';
+
+
+var cVersionCode: any
+var cVersionName: any
+var nVersionCode: any
+var nVersionName: any
 
 document.getElementById('btnradio1').onclick = () => { setBumpMode('patch') }
 document.getElementById('btnradio2').onclick = () => { setBumpMode('minor') }
@@ -15,7 +18,7 @@ const updateUI = () => {
 }
 
 const setPaths = async () => {
-    const paths = await window.api.getPaths()
+    const paths = await (window as any).api.getPaths()
     var inner = "<option selected>Select project</option>"
     for (const iterator of paths) {
         inner += `<option value="${iterator.path}">${iterator.path}</option>`
@@ -27,20 +30,20 @@ setPaths()
 
 const addProjectBtn = document.getElementById('addProjectButton')
 addProjectBtn.onclick = async () => {
-    await window.api.addPath()
+    await (window as any).api.addPath()
     await setPaths()
 }
 
-const dropdownMenu = document.getElementById('dropdown-menu')
+const dropdownMenu = document.getElementById('dropdown-menu') as any
 dropdownMenu.onchange = async () => {
     const projectPath = dropdownMenu.options[dropdownMenu.selectedIndex].value
-    const content = await window.api.getContent(projectPath)
+    const content = await (window as any).api.getContent(projectPath)
     cVersionCode = /(versionCode [0-9]+)/.exec(content)?.at(0) || /(versionCode = [0-9]+)/.exec(content)?.at(0)
     cVersionName = /(versionName ".+")/.exec(content)?.at(0) || /(versionName = ".+")/.exec(content)?.at(0)
     setBumpMode('patch')
 }
 
-const setBumpMode = (mode) => {
+const setBumpMode = (mode: any) => {
     const oldVersionCode = /([0-9]+)/.exec(cVersionCode)[0]
     nVersionCode = cVersionCode.replace(oldVersionCode, parseInt(oldVersionCode)+1)
     const oldVersionName = /([0-9]+\.[0-9]+\.[0-9]+)/.exec(cVersionName)[0] || /([0-9]+\.[0-9]+)/.exec(cVersionName)[0]
@@ -65,7 +68,7 @@ const setBumpMode = (mode) => {
 
 document.getElementById('bump-button').onclick = async () => {
     const projectPath = dropdownMenu.options[dropdownMenu.selectedIndex].value
-    await window.api.bump(projectPath, [cVersionCode, nVersionCode, cVersionName, nVersionName])
+    await (window as any).api.bump(projectPath, [cVersionCode, nVersionCode, cVersionName, nVersionName])
     cVersionCode = nVersionCode
     cVersionName = nVersionName
     document.getElementById('btnradio1').click()

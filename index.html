@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Bumper</title>
+    <link href="./node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  </head>
+  <body>
+    <div class="container p-4">
+  
+      <div class="w-100 text-center">
+        <label class="display-3">Bumper</label>
+      </div>
+  
+      <div class="row my-4">
+        <div class="col">
+          <button type="button" class="button" id="addProjectButton">Add project</button>
+        </div>
+        <div class="col">
+          <select class="form-select form-select-md" id="dropdown-menu"></select>
+        </div>
+      </div>
+  
+      
+      <div class="row my-4">
+        <div class="col">
+          <div class="btn-group m-1">
+            <input type="radio" class="btn-check" name="btnradio" id="btnradio1" checked hidden>
+            <label class="btn button" for="btnradio1">Patch</label>
+  
+            <input type="radio" class="btn-check" name="btnradio" id="btnradio2" hidden>
+            <label class="btn button" for="btnradio2">Minor</label>
+  
+            <input type="radio" class="btn-check" name="btnradio" id="btnradio3" hidden>
+            <label class="btn button" for="btnradio3">Major</label>
+          </div>
+        </div>
+      </div>
+  
+  
+      <div class="row my-4">
+        <div class="col mx-2">
+          <div class="row">Current: </div>
+          <div class="row" id="current_version_code"></div>
+          <div class="row" id="current_version_name"></div>
+        </div>
+        <div class="col mx-2">
+          <div class="row">New: </div>
+          <div class="row" id="new_version_code"></div>
+          <div class="row" id="new_version_name"></div>
+        </div>
+      </div>
+  
+    </div>
+  
+    <div class="text-center">
+      <button type="button" class="button" id="bump-button">Bump</button>
+    </div>
+    
+    <script src="./node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="/src/renderer.ts"></script>
+  </body>
+  
+</html>

@@ -1,10 +1,11 @@
-const { app, BrowserWindow } = require('electron')
-const path = require('path')
+import { app, BrowserWindow } from 'electron';
+import path from 'path';
+import update from 'update-electron-app'
+import startup from 'electron-squirrel-startup'
 
-require('update-electron-app').updateElectronApp()
+update.updateElectronApp()
 
-
-if (require('electron-squirrel-startup')) app.quit()
+if (startup) app.quit()
 
 const createWindow = () => {
   const mainWindow = new BrowserWindow({
@@ -17,7 +18,12 @@ const createWindow = () => {
     }
   })
 
-  mainWindow.loadFile(path.join(__dirname, 'index.html'))
+  if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
+    mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
+  } else {
+    mainWindow.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`));
+  }
+
   mainWindow.removeMenu()
   //mainWindow.webContents.openDevTools()
 }
@@ -33,17 +39,17 @@ app.on('activate', () => {
 })
 
 
-const { ipcMain, dialog } = require('electron')
-const fs = require('fs')
-const Store = require('electron-store')
+import { ipcMain, dialog } from 'electron'
+import fs from 'fs'
+import Store from 'electron-store'
+import { execSync } from 'child_process'
 const store = new Store()
-const execSync = require('child_process').execSync
 
 ipcMain.handle('getPaths', () => {
   if (!store.has('paths')) {
     store.set('paths', JSON.stringify([]))
   }
-  const json = store.get('paths')
+  const json:any = store.get('paths')
   return JSON.parse(json)
 })
 
@@ -52,7 +58,7 @@ ipcMain.handle('addPath', () => {
   const gradle = path.join(result[0], 'app', 'build.gradle')
   const gradleKt = path.join(result[0], 'app', 'build.gradle.kts')
   if (!fs.existsSync(gradle) && !fs.existsSync(gradleKt)) return //gradle not found
-  const json = store.get('paths')
+  const json: any = store.get('paths')
   const paths = JSON.parse(json)
   for (const iterator of paths) {
     if (iterator.path == result[0]) return //path already exists
