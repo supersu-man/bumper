@@ -74,7 +74,6 @@ ipcMain.handle('getContent', (event, projectPath) => {
   let content;
   if (fs.existsSync(gradle)) content = fs.readFileSync(gradle, 'utf8')
   if (fs.existsSync(gradleKt)) content = fs.readFileSync(gradleKt, 'utf8')
-  console.log(content)
   return content
 })
 
@@ -94,7 +93,6 @@ ipcMain.handle('bump', (event, projectPath, ar) => {
     fs.writeFileSync(gradleKt, content)
   }
   const versionName = /([0-9]+\.[0-9]+\.[0-9]+)/.exec(ar[3])[0] || /([0-9]+\.[0-9]+)/.exec(ar[3])[0]
-  console.log(content)
   execSync('git add -A', { cwd: projectPath })
   execSync(`git commit -m v${versionName}`, { cwd: projectPath })
   execSync(`git tag v${versionName}`, { cwd: projectPath })
