@@ -1,0 +1,50 @@
+
+<div class="h-full p-4">
+    <div class="grid align-items-center mb-4">
+        <div class="col">
+            <p-dropdown styleClass="w-full" [(ngModel)]="selectedPath" [options]="projectPaths" placeholder="Select a project path" (onChange)="onPathChange()"/>
+        </div>
+        @if (selectedPath) {
+        <div class="col-fixed">
+            <p-button icon="pi pi-trash" (click)="deleteProjectPath()" severity="danger"/>
+        </div>
+        }
+        <div class="col-fixed">
+            <p-button icon="pi pi-plus" (click)="openProjectDialog()"/>
+        </div>
+    </div>
+    @if (selectedPath) {
+        <div class="grid justify-content-center mb-4">
+            <div class="col-fixed">
+                <p-selectButton [options]="bumpOptions" [(ngModel)]="selectedBumpOption"  optionLabel="label" optionValue="value" (onOptionClick)="bumpversions()"/>
+            </div>
+        </div>
+        <div class="grid justify-content-center">
+            <div class="col-fixed" style="width: 400px;">
+                <div class="grid">
+                    <div class="col-4">Version Code:</div>
+                    <div class="col">{{currentVersionCode}}</div>
+                    <div class="col">-></div>
+                    <div class="col">{{newVersionCode}}</div>
+                </div>
+                <div class="grid">
+                    <div class="col-4">Version Name:</div>
+                    <div class="col">{{currentVersionName}}</div>
+                    <div class="col">-></div>
+                    <div class="col">{{newVersionName}}</div>
+                </div>
+            </div>
+        </div>
+        <div class="grid justify-content-center">
+            <div class="col-fixed">
+                <p-button label="Bump" (click)="bumpProject()"/>
+            </div>
+        </div>
+    } @else {
+        <div class="grid justify-content-center mt-5">
+            <div class="col-fixed">
+                Add/Select a project
+            </div>
+        </div> 
+    }
+</div>

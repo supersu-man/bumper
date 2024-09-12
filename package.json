@@ -1,50 +1,45 @@
 {
   "name": "bumper",
-  "productName": "bumper",
-  "version": "1.1.0",
-  "description": "A tool to bump version for android projects.",
-  "main": ".vite/build/main.js",
-  "repository": "github:supersu-man/bumper",
+  "version": "0.0.0",
+  "main": "build/main.js",
   "scripts": {
-    "start": "electron-forge start",
-    "package": "electron-forge package",
-    "make": "electron-forge make",
-    "publish": "electron-forge publish",
-    "lint": "eslint --ext .ts,.tsx .",
-    "patch": "npm version patch &&  git push && git push --tags",
-    "minor": "npm version minor && git push && git push --tags",
-    "major": "npm version major && git push && git push --tags"
+    "ng": "ng",
+    "start": "ng serve",
+    "electron-start": "npm run electron-build && electron ./build/main.js --dev",
+    "build": "ng build --base-href",
+    "electron-build": "tsc --project tsconfig.electron.json",
+    "electron-package": "npm run build && npm run electron-build && npx electron-builder"
   },
-  "keywords": [],
-  "author": {
-    "name": "Sumanth Perambuduri",
-    "email": "35676632+supersu-man@users.noreply.github.com"
-  },
-  "license": "Apache License 2.0",
-  "devDependencies": {
-    "@electron-forge/cli": "^7.2.0",
-    "@electron-forge/maker-deb": "^7.2.0",
-    "@electron-forge/maker-rpm": "^7.2.0",
-    "@electron-forge/maker-squirrel": "^7.2.0",
-    "@electron-forge/maker-zip": "^7.2.0",
-    "@electron-forge/plugin-auto-unpack-natives": "^7.2.0",
-    "@electron-forge/plugin-vite": "^7.2.0",
-    "@electron-forge/publisher-github": "^7.2.0",
-    "@types/electron-squirrel-startup": "^1.0.2",
-    "@typescript-eslint/eslint-plugin": "^6.21.0",
-    "@typescript-eslint/parser": "^6.21.0",
-    "@vitejs/plugin-vue": "^5.0.4",
-    "electron": "^28.2.2",
-    "eslint": "^8.56.0",
-    "eslint-plugin-import": "^2.29.1",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.3.3"
-  },
+  "private": true,
   "dependencies": {
-    "bootstrap": "^5.3.2",
-    "electron-squirrel-startup": "^1.0.0",
-    "electron-store": "^8.1.0",
-    "update-electron-app": "^3.0.0",
-    "vue": "^3.4.18"
+    "@angular/animations": "^18.2.0",
+    "@angular/common": "^18.2.0",
+    "@angular/compiler": "^18.2.0",
+    "@angular/core": "^18.2.0",
+    "@angular/forms": "^18.2.0",
+    "@angular/platform-browser": "^18.2.0",
+    "@angular/platform-browser-dynamic": "^18.2.0",
+    "@angular/router": "^18.2.0",
+    "electron-store": "^10.0.0",
+    "primeflex": "^3.3.1",
+    "primeicons": "^7.0.0",
+    "primeng": "^17.18.9",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0",
+    "zone.js": "~0.14.10"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "^18.2.1",
+    "@angular/cli": "^18.2.1",
+    "@angular/compiler-cli": "^18.2.0",
+    "electron": "^32.0.1",
+    "electron-builder": "^24.13.3",
+    "typescript": "~5.5.2"
+  },
+  "build": {
+    "appId": "dev.sumanth.bumper",
+    "files": [
+      "build/"
+    ]
   }
 }
