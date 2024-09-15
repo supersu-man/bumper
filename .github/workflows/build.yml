@@ -1,9 +1,9 @@
-name: Build
+name: Build/release
 
-on:
+on: 
   push:
     branches:
-    - main
+      - 'main'
 
 jobs:
   release:
@@ -11,55 +11,55 @@ jobs:
 
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, windows-latest]
 
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v4
 
-      - name: Check commit message
-        uses: kaisugi/action-regex-match@v1.0.1
+      - uses: kaisugi/action-regex-match@v1.0.1
         id: regex-match
         with:
           text: ${{ github.event.head_commit.message }}
-          regex: '^[0-9]+\.[0-9]+\.[0-9]+$'
+          regex: '^v[0-9]+\.[0-9]+\.[0-9]+$'
 
       - name: Install Node
         uses: actions/setup-node@v4
         with:
-          node-version: 18
-        
-      - name: Install dependencies
-        run: npm i
+          node-version: 20
 
-      - name: Package app
-        if: steps.regex-match.outputs.match == ''
-        run: npm run make
+      - name: Package Electron
+        if: ${{ steps.regex-match.outputs.match == '' }}
+        env: 
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npm i
+          npm run electron-package
 
-      - name: Package and Publish app
-        if: steps.regex-match.outputs.match != ''
-        run: npm run publish
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+      - name: Package and Publish Electron
+        if: ${{ steps.regex-match.outputs.match != '' }}
+        env: 
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npm i
+          npm run electron-publish
 
       - name: Build Changelog
-        if: matrix.os == 'ubuntu-latest' && steps.regex-match.outputs.match != ''
+        if: ${{ steps.regex-match.outputs.match != '' }}
         id: changelog
-        uses: ardalanamini/auto-changelog@v3
+        uses: ardalanamini/auto-changelog@v4
         with:
           mention-authors: false
           mention-new-contributors: false
-          include-compare: false
+          include-compare-link: false
           semver: false
-
-      - name: Update release
-        if: matrix.os == 'ubuntu-latest' && steps.regex-match.outputs.match != ''
-        id: update_release
-        uses: meeDamian/github-release@2.0
+      
+      - name: Update Release
+        if: ${{ steps.regex-match.outputs.match != '' }}
+        uses: ncipollo/release-action@v1.13.0
         with:
-          tag: v${{ github.event.head_commit.message }}
-          allow_override: true
+          body: ${{ steps.changelog.outputs.changelog }} 
+          allowUpdates: true
+          tag: ${{ github.event.head_commit.message }}
+          name: Release ${{ github.event.head_commit.message }}
           token: ${{ secrets.GITHUB_TOKEN }}
-          name: Release ${{github.ref_name}}
-          body: ${{ steps.changelog.outputs.changelog }} &#x20;

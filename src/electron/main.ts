@@ -2,6 +2,11 @@ import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import path from 'path';
 import fs from 'fs'
 import { execSync } from 'child_process'
+import { autoUpdater } from "electron-updater"
+if (process.platform === 'win32'){
+  app.setAppUserModelId(app.name);
+}
+autoUpdater.checkForUpdatesAndNotify()
 
 let mainWindow: Electron.BrowserWindow;
 const assetsPath = process.argv.includes('--dev') ? '../src/assets' : 'browser/assets'

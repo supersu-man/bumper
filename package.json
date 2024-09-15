@@ -1,14 +1,20 @@
 {
   "name": "bumper",
-  "version": "0.0.0",
+  "version": "2.0.0",
   "main": "build/main.js",
+  "author": { "name": "Sumanth Perambuduri", "email": "sumanthpera444@gmail.com" },
+  "description": "Bumps Android Project version",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
     "electron-start": "npm run electron-build && electron ./build/main.js --dev",
-    "build": "ng build --base-href",
+    "angular-build": "ng build --base-href",
     "electron-build": "tsc --project tsconfig.electron.json",
-    "electron-package": "npm run build && npm run electron-build && npx electron-builder"
+    "electron-package": "npm run angular-build && npm run electron-build && npx electron-builder --publish never",
+    "electron-publish": "npm run angular-build && npm run electron-build && npx electron-builder --publish always",
+    "patch": "npm version patch -m v%s && git push && git push --tags",
+    "minor": "npm version minor -m v%s && git push && git push --tags",
+    "major": "npm version major -m v%s && git push && git push --tags"
   },
   "private": true,
   "dependencies": {
@@ -21,6 +27,7 @@
     "@angular/platform-browser-dynamic": "^18.2.0",
     "@angular/router": "^18.2.0",
     "electron-store": "^10.0.0",
+    "electron-updater": "^6.3.4",
     "primeflex": "^3.3.1",
     "primeicons": "^7.0.0",
     "primeng": "^17.18.9",
@@ -38,8 +45,24 @@
   },
   "build": {
     "appId": "dev.sumanth.bumper",
+    "productName": "Bumper",
     "files": [
       "build/"
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "target": "AppImage"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "supersu-man",
+        "repo": "bumper",
+        "releaseType": "release",
+        "private": false
+      }
     ]
   }
 }
