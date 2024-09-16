@@ -2,7 +2,10 @@
   "name": "bumper",
   "version": "2.0.0",
   "main": "build/main.js",
-  "author": { "name": "Sumanth Perambuduri", "email": "sumanthpera444@gmail.com" },
+  "author": {
+    "name": "Sumanth Perambuduri",
+    "email": "sumanthpera444@gmail.com"
+  },
   "description": "Bumps Android Project version",
   "scripts": {
     "ng": "ng",
@@ -26,7 +29,6 @@
     "@angular/platform-browser": "^18.2.0",
     "@angular/platform-browser-dynamic": "^18.2.0",
     "@angular/router": "^18.2.0",
-    "electron-store": "^10.0.0",
     "electron-updater": "^6.3.4",
     "primeflex": "^3.3.1",
     "primeicons": "^7.0.0",

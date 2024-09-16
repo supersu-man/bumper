@@ -61,7 +61,6 @@ export class AppComponent implements OnInit {
     this.currentVersionCode = this.versionCodeRegex.exec(this.content)?.[0] as string
     this.currentVersionName = this.versionNameRegex.exec(this.content)?.[0] as string
     this.bumpversions()
-    this.checkStatus()
   }
 
   checkStatus = async () => {
