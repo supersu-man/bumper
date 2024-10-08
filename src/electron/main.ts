@@ -10,6 +10,11 @@ autoUpdater.checkForUpdatesAndNotify()
 
 let mainWindow: Electron.BrowserWindow;
 const assetsPath = process.argv.includes('--dev') ? '../src/assets' : 'browser/assets'
+let store: any
+
+import("electron-store").then((value) => {
+  store = new value.default()
+})
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -48,12 +53,9 @@ app.on('activate', () => {
   }
 });
 
-const pathsFilePath = path.join(app.getPath("userData"), "paths.json")
 ipcMain.handle('getPaths', () => {
-  if(!fs.existsSync(pathsFilePath)) 
-    fs.writeFileSync(pathsFilePath, "[]")
-  const jsonString = fs.readFileSync(pathsFilePath, 'utf8')
-  return JSON.parse(jsonString)
+  let paths = store.get('paths', [])
+  return paths
 })
 
 ipcMain.handle('addPath', (_event) => {
@@ -63,26 +65,17 @@ ipcMain.handle('addPath', (_event) => {
   const gradle = path.join(projectPath, 'app', 'build.gradle')
   const gradleKt = path.join(projectPath, 'app', 'build.gradle.kts')
   if(!fs.existsSync(gradle) && !fs.existsSync(gradleKt)) return 'Gradle file does not exist'
-  
-  if(!fs.existsSync(pathsFilePath)) 
-    fs.writeFileSync(pathsFilePath, "[]")
-  const jsonString = fs.readFileSync(pathsFilePath, 'utf8')
-  const projectsPaths = JSON.parse(jsonString)
-  console.log(projectsPaths)
+  let projectsPaths: string[] = store.get('paths', []) as string[]
   if(projectsPaths.includes(projectPath)) return 'Path exists'
   projectsPaths.push(projectPath)
-  console.log(projectsPaths)
-  fs.writeFileSync(pathsFilePath, JSON.stringify(projectsPaths))
+  store.set('paths', projectsPaths)
   return 'success'
 })
 
 ipcMain.handle('deletePath', (_event, projectPath: string) => {
-  if(!fs.existsSync(pathsFilePath)) 
-    fs.writeFileSync(pathsFilePath, "[]")
-  const jsonString = fs.readFileSync(pathsFilePath, 'utf8')
-  let projectsPaths = JSON.parse(jsonString)
-  projectsPaths = projectsPaths.filter((path: string) => path != projectPath)
-  fs.writeFileSync(pathsFilePath, JSON.stringify(projectsPaths))
+  let projectsPaths: string[] = store.get('paths', []) as string[]
+  projectsPaths = projectsPaths.filter(path => path != projectPath);
+  store.set('paths', projectsPaths)
   return 'success'
 })
 
