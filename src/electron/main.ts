@@ -10,11 +10,7 @@ autoUpdater.checkForUpdatesAndNotify()
 
 let mainWindow: Electron.BrowserWindow;
 const assetsPath = process.argv.includes('--dev') ? '../src/assets' : 'browser/assets'
-let store: any
 
-import("electron-store").then((value) => {
-  store = new value.default()
-})
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -26,7 +22,6 @@ function createWindow() {
     icon: path.join(__dirname, assetsPath + '/icon.png')
   });
   mainWindow.removeMenu()
-  mainWindow.webContents.openDevTools()
 
   if(process.argv.includes('--dev')) {
     mainWindow.loadURL('http://localhost:4200')
