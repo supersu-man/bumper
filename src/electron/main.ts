@@ -26,6 +26,7 @@ function createWindow() {
     icon: path.join(__dirname, assetsPath + '/icon.png')
   });
   mainWindow.removeMenu()
+  mainWindow.webContents.openDevTools()
 
   if(process.argv.includes('--dev')) {
     mainWindow.loadURL('http://localhost:4200')
@@ -53,9 +54,12 @@ app.on('activate', () => {
   }
 });
 
+const pathsFilePath = path.join(app.getPath("userData"), "paths.json")
 ipcMain.handle('getPaths', () => {
-  let paths = store.get('paths', [])
-  return paths
+  if(!fs.existsSync(pathsFilePath)) 
+    fs.writeFileSync(pathsFilePath, "[]")
+  const jsonString = fs.readFileSync(pathsFilePath, 'utf8')
+  return JSON.parse(jsonString)
 })
 
 ipcMain.handle('addPath', (_event) => {
@@ -65,17 +69,24 @@ ipcMain.handle('addPath', (_event) => {
   const gradle = path.join(projectPath, 'app', 'build.gradle')
   const gradleKt = path.join(projectPath, 'app', 'build.gradle.kts')
   if(!fs.existsSync(gradle) && !fs.existsSync(gradleKt)) return 'Gradle file does not exist'
-  let projectsPaths: string[] = store.get('paths', []) as string[]
+  if(!fs.existsSync(pathsFilePath)) 
+    fs.writeFileSync(pathsFilePath, "[]")
+  const jsonString = fs.readFileSync(pathsFilePath, 'utf8')
+  const projectsPaths = JSON.parse(jsonString)
+  console.log(projectsPaths)
   if(projectsPaths.includes(projectPath)) return 'Path exists'
   projectsPaths.push(projectPath)
-  store.set('paths', projectsPaths)
+  fs.writeFileSync(pathsFilePath, JSON.stringify(projectsPaths))
   return 'success'
 })
 
 ipcMain.handle('deletePath', (_event, projectPath: string) => {
-  let projectsPaths: string[] = store.get('paths', []) as string[]
-  projectsPaths = projectsPaths.filter(path => path != projectPath);
-  store.set('paths', projectsPaths)
+  if(!fs.existsSync(pathsFilePath)) 
+    fs.writeFileSync(pathsFilePath, "[]")
+  const jsonString = fs.readFileSync(pathsFilePath, 'utf8')
+  let projectsPaths = JSON.parse(jsonString)
+  projectsPaths = projectsPaths.filter((path: string) => path != projectPath)
+  fs.writeFileSync(pathsFilePath, JSON.stringify(projectsPaths))
   return 'success'
 })
 
