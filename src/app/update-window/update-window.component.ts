@@ -12,6 +12,8 @@ export class UpdateWindowComponent implements OnInit {
 
   progress = 0
 
+  constructor(private zone: NgZone) { }
+
   ngOnInit(): void {
     (window as any).api.onUpdateProgress((progress: number) => {
       this.zone.run(() => {
@@ -20,6 +22,5 @@ export class UpdateWindowComponent implements OnInit {
     })
   }
 
-  constructor(private zone: NgZone) { }
 
 }
