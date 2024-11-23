@@ -4,6 +4,7 @@ import { DropdownModule } from 'primeng/dropdown';
 import { ButtonModule } from 'primeng/button';
 import { FormsModule } from '@angular/forms';
 import { SelectButtonModule } from 'primeng/selectbutton';
+import { MessageService } from 'primeng/api';
 
 
 @Component({
@@ -31,6 +32,8 @@ export class HomeComponent {
 
   content = ''
 
+  constructor(private messageService: MessageService) {}
+
   ngOnInit(): void {
     this.getProjectPaths();
   }
@@ -48,6 +51,9 @@ export class HomeComponent {
 
   openProjectDialog = async () => {
     const result = await (window as any).api.addPath()
+    if(result != "success") 
+      this.messageService.add({ severity: 'error', summary: 'Error', detail: result });
+    console.log(result)
     this.getProjectPaths()
   }
 
