@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
 import { DropdownModule } from 'primeng/dropdown';
 import { ButtonModule } from 'primeng/button';
 import { FormsModule } from '@angular/forms';
@@ -10,7 +9,7 @@ import { MessageService } from 'primeng/api';
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [RouterOutlet, DropdownModule, ButtonModule, FormsModule, SelectButtonModule],
+  imports: [DropdownModule, ButtonModule, FormsModule, SelectButtonModule],
   templateUrl: './home.component.html',
   styles: ``
 })

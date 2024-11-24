@@ -1,6 +1,8 @@
 # Bumper
 
-Really simple ELectron + Typescript + Angular boilerplate.
+Bumper is an Electron app that automates version bumping for Android projects, ensuring consistent and up-to-date versioning with ease.
+
+![](githubdocs/screenshot.png)
 
 ## Development
 

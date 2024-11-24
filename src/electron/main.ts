@@ -35,7 +35,7 @@ const indexUrl = url.format({
 function createMainWindow() {
   mainWindow = new BrowserWindow({
     height: 600,
-    width: 800,
+    width: 1000,
     title: "Bumper",
     webPreferences: {
       preload: path.join(__dirname, 'preload.js')

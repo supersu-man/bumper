@@ -53,11 +53,11 @@
     ],
     "win": {
       "target": "nsis",
-      "icon": "build/browser/assets/icon-256.png"
+      "icon": "build/browser/assets/icon.png"
     },
     "linux": {
       "target": "AppImage",
-      "icon": "build/browser/assets/icon-256.png"
+      "icon": "build/browser/assets/icon.png"
     },
     "publish": [
       {
