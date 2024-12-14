@@ -4,8 +4,9 @@ contextBridge.exposeInMainWorld('api', {
     getPaths: () => ipcRenderer.invoke('getPaths'),
     addPath: () => ipcRenderer.invoke('addPath'),
     deletePath: (projectPath: string) => ipcRenderer.invoke('deletePath', projectPath),
-    getGradleContent: (projectPath: string) => ipcRenderer.invoke('getGradleContent', projectPath),
-    writeGradleContent: (projectPath: string, content: string, versionName: string) => ipcRenderer.invoke('writeGradleContent', projectPath, content, versionName),
-    checkStatus: (projectPath: string) => ipcRenderer.invoke('checkStatus', projectPath),
+    getVersionFileObj: (projectPath: string) => ipcRenderer.invoke('getVersionFileObj', projectPath),
+    writeVersionFileContent: (projectPath: string, contents: string[]) => ipcRenderer.invoke('writeVersionFileContent', projectPath, contents),
+    commitTagPush: (projectPath: string, version: string) => ipcRenderer.invoke('commitTagPush', projectPath, version),
+
     onUpdateProgress: (callback: (value: string) => void) => ipcRenderer.on("updateProgess", (_event, value) => callback(value))
 })

@@ -1,7 +1,12 @@
 <div class="h-full p-4">
+    @if (fileObjects.length>0) {
+        <div class="grid">
+            <div class="col">Project type: {{fileObjects[0].type}}</div>
+        </div>
+    }
     <div class="grid align-items-center mb-4">
         <div class="col">
-            <p-dropdown styleClass="w-full" [(ngModel)]="selectedPath" [options]="projectPaths" placeholder="Select a project path" (onChange)="onPathChange()"/>
+            <p-dropdown styleClass="w-full" [(ngModel)]="selectedPath" [options]="projectPaths" placeholder="Select a project path" (onChange)="bump_type=htmlTypes.BumpType.Minor;onPathChange()"/>
         </div>
         @if (selectedPath) {
         <div class="col-fixed">
@@ -12,26 +17,36 @@
             <p-button icon="pi pi-plus" (click)="openProjectDialog()"/>
         </div>
     </div>
-    @if (selectedPath) {
+    @if (fileObjects.length>0) {
         <div class="grid justify-content-center mb-4">
             <div class="col-fixed">
-                <p-selectButton [options]="bumpOptions" [(ngModel)]="selectedBumpOption"  optionLabel="label" optionValue="value" (onOptionClick)="bumpversions()"/>
+                <p-selectButton [options]="bumpOptions" [(ngModel)]="bump_type"  optionLabel="label" optionValue="value" (onChange)="onPathChange()" />
             </div>
         </div>
         <div class="grid justify-content-center">
             <div class="col-fixed" style="width: 400px;">
-                <div class="grid">
-                    <div class="col-4">Version Code:</div>
-                    <div class="col">{{currentVersionCode}}</div>
-                    <div class="col">-></div>
-                    <div class="col">{{newVersionCode}}</div>
-                </div>
-                <div class="grid">
-                    <div class="col-4">Version Name:</div>
-                    <div class="col">{{currentVersionName}}</div>
-                    <div class="col">-></div>
-                    <div class="col">{{newVersionName}}</div>
-                </div>
+                @if (fileObjects[0].type == htmlTypes.FileType.Gradle || fileObjects[0].type == htmlTypes.FileType.GradleKotlin) {
+                    <div class="grid">
+                        <div class="col-4">Version Code:</div>
+                        <div class="col">{{versionCode?.currentVersion}}</div>
+                        <div class="col">-></div>
+                        <div class="col">{{versionCode?.newVersion}}</div>
+                    </div>
+                    <div class="grid">
+                        <div class="col-4">Version Name:</div>
+                        <div class="col">{{versionName?.currentVersion}}</div>
+                        <div class="col">-></div>
+                        <div class="col">{{versionName?.newVersion}}</div>
+                    </div>
+                }
+                @if (fileObjects[0].type == htmlTypes.FileType.Package) {
+                    <div class="grid">
+                        <div class="col-4">Version Code:</div>
+                        <div class="col">{{version?.currentVersion}}</div>
+                        <div class="col">-></div>
+                        <div class="col">{{version?.newVersion}}</div>
+                    </div>
+                }
             </div>
         </div>
         <div class="grid justify-content-center">

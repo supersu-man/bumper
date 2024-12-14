@@ -1,7 +1,7 @@
 {
   "name": "bumper",
   "version": "2.0.1",
-  "main": "build/main.js",
+  "main": "build/electron/main.js",
   "author": {
     "name": "Sumanth Perambuduri",
     "email": "sumanthpera444@gmail.com"
@@ -10,7 +10,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "electron-start": "npm run electron-build && electron ./build/main.js --dev",
+    "electron-start": "npm run electron-build && electron ./build/electron/main.js --dev",
     "angular-build": "ng build --base-href",
     "electron-build": "tsc --project tsconfig.electron.json",
     "electron-package": "npm run angular-build && npm run electron-build && npx electron-builder --publish never",
