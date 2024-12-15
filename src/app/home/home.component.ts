@@ -4,9 +4,9 @@ import { ButtonModule } from 'primeng/button';
 import { FormsModule } from '@angular/forms';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { MessageService } from 'primeng/api';
-import { BumpType, FileType } from '../constants/enums';
-import { VersionType, FileObject } from '../constants/interfaces';
-import { versionCodeGradle, versionCodeKotlin, versionNameGradle, versionNameKotlin, versionRegex } from '../constants/regex';
+import { BumpType, FileType, ProjectType } from '../constants/enums';
+import { Regex } from '../constants/regex';
+import { FolderPath, Version, VersionFile } from '../constants/interfaces';
 
 @Component({
   selector: 'app-home',
@@ -17,14 +17,14 @@ import { versionCodeGradle, versionCodeKotlin, versionNameGradle, versionNameKot
 })
 export class HomeComponent {
 
-  projectPaths: string[] = []
-  selectedPath: string = ""
+  folderPaths: FolderPath[] = []
+  selectedFolderPath: FolderPath | undefined
+  versionFiles: VersionFile[] = []
 
-  versionCode: VersionType | undefined
-  versionName: VersionType | undefined
-  version: VersionType | undefined
+  versionCode: Version | undefined
+  versionName: Version | undefined
+  version: Version | undefined
 
-  fileObjects: FileObject[] = []
 
   htmlTypes = {
     FileType: FileType,
@@ -38,7 +38,7 @@ export class HomeComponent {
     { label: 'Minor', value: BumpType.Minor },
     { label: 'Patch', value: BumpType.Patch }
   ]
-  bump_type = BumpType.Minor
+  selectedBumpOption = BumpType.Minor
 
 
   constructor(private messageService: MessageService) {}
@@ -48,13 +48,13 @@ export class HomeComponent {
   }
 
   getProjectPaths = async () => {
-    this.projectPaths = await this.window.api.getPaths()
-    console.log(this.projectPaths)
+    this.folderPaths = await this.window.api.getPaths()
+    console.log(this.folderPaths)
   }
 
   deleteProjectPath = async () => {
-    await this.window.api.deletePath(this.selectedPath)
-    this.selectedPath = ''
+    await this.window.api.deletePath(this.selectedFolderPath?.path)
+    this.selectedFolderPath = undefined
     this.getProjectPaths()
   }
 
@@ -62,44 +62,39 @@ export class HomeComponent {
     const result = await this.window.api.addPath()
     if(result != "success") 
       this.messageService.add({ severity: 'error', summary: 'Error', detail: result });
-    console.log(result)
     this.getProjectPaths()
   }
 
   onPathChange = async () => {
-    if(!this.selectedPath) return
+    if(!this.selectedFolderPath) return
 
-    this.fileObjects = await this.window.api.getVersionFileObj(this.selectedPath)
+    console.log(this.selectedFolderPath)
+    this.versionFiles = await this.window.api.getVersionFiles(this.selectedFolderPath)
     
-    if(this.fileObjects.length==0) {
-      this.messageService.add({ severity: 'error', summary: 'Error', detail: "Supported files not found in project" });
+    if(this.versionFiles.length==0) {
+      return this.messageService.add({ severity: 'error', summary: 'Error', detail: "Supported files not found in project" });
     }
 
-    if(this.fileObjects[0].type == FileType.Gradle) {
-      const currentVersionName = versionNameGradle.exec(this.fileObjects[0].content)?.[0] as string
-      const currentVersionCode = versionCodeGradle.exec(this.fileObjects[0].content)?.[0] as string
-      this.versionCode = { currentVersion: currentVersionCode, newVersion: Number(currentVersionCode)+1+'' }
-      this.versionName = { currentVersion: currentVersionName, newVersion: this.bumpversion(currentVersionName, this.bump_type) }
+    if(this.versionFiles[0].type == FileType.Gradle) {
+      const currentVersionName = Regex.VersionNameGradle.exec(this.versionFiles[0].content)?.[0] as string
+      const currentVersionCode = Regex.VersionCodeGradle.exec(this.versionFiles[0].content)?.[0] as string
+      this.versionCode = { current: currentVersionCode, new: Number(currentVersionCode)+1+'' }
+      this.versionName = { current: currentVersionName, new: this.bumpversion(currentVersionName, this.selectedBumpOption) }
     }
 
-    if(this.fileObjects[0].type == FileType.GradleKotlin) {
-      const currentVersionName = versionNameKotlin.exec(this.fileObjects[0].content)?.[0] as string
-      const currentVersionCode = versionCodeKotlin.exec(this.fileObjects[0].content)?.[0] as string
-      this.versionCode = { currentVersion: currentVersionCode, newVersion: Number(currentVersionCode)+1+'' }
-      this.versionName = { currentVersion: currentVersionName, newVersion: this.bumpversion(currentVersionName, this.bump_type) }
+    if(this.versionFiles[0].type == FileType.GradleKotlin) {
+      const currentVersionName = Regex.VersionNameKotlin.exec(this.versionFiles[0].content)?.[0] as string
+      const currentVersionCode = Regex.VersionCodeKotlin.exec(this.versionFiles[0].content)?.[0] as string
+      this.versionCode = { current: currentVersionCode, new: Number(currentVersionCode)+1+'' }
+      this.versionName = { current: currentVersionName, new: this.bumpversion(currentVersionName, this.selectedBumpOption) }
     }
 
-    if(this.fileObjects[0].type == FileType.Package && this.fileObjects[1].type == FileType.PackageLock) {
-      const currentVersion = versionRegex.exec(this.fileObjects[0].content)?.[0] as string
-      this.version = { currentVersion: currentVersion, newVersion: this.bumpversion(currentVersion, this.bump_type) }
+    if(this.versionFiles[0].type == FileType.Package && this.versionFiles[1].type == FileType.PackageLock) {
+      const currentVersion = Regex.VersionRegex.exec(this.versionFiles[0].content)?.[0] as string
+      this.version = { current: currentVersion, new: this.bumpversion(currentVersion, this.selectedBumpOption) }
     }
     
-    console.log(this.fileObjects)
-  }
-
-  checkStatus = async () => {
-    const status = await (window as any).api.checkStatus(this.selectedPath)
-    console.log(status)
+    console.log(this.versionFiles)
   }
 
   bumpversion = (version: string, bumpType: BumpType) => {
@@ -116,25 +111,26 @@ export class HomeComponent {
   }
 
   bumpProject = async () => {
-    if(this.fileObjects[0].type == FileType.Gradle && this.versionName && this.versionCode) {
-      let newContent = this.fileObjects[0].content.replace(versionNameGradle, this.versionName.newVersion)
-      newContent = newContent.replace(versionCodeGradle, this.versionCode.newVersion)
-      await this.window.api.writeVersionFileContent(this.selectedPath, [newContent])
-      await this.window.api.commitTagPush(this.selectedPath, this.versionName.newVersion)
+    if(this.versionFiles[0].type == FileType.Gradle && this.versionName && this.versionCode) {
+      let newContent = this.versionFiles[0].content.replace(Regex.VersionNameGradle, this.versionName.new)
+      newContent = newContent.replace(Regex.VersionCodeGradle, this.versionCode.new)
+      await this.window.api.writeFile(this.versionFiles[0].path, newContent)
+      await this.window.api.commitTagPush(this.selectedFolderPath?.path, this.versionName.new)
     }
 
-    if(this.fileObjects[0].type == FileType.GradleKotlin && this.versionName && this.versionCode) {
-      let newContent = this.fileObjects[0].content.replace(versionNameKotlin, this.versionName.newVersion)
-      newContent = newContent.replace(versionCodeKotlin, this.versionCode.newVersion)
-      await this.window.api.writeVersionFileContent(this.selectedPath, [newContent])
-      await this.window.api.commitTagPush(this.selectedPath, this.versionName.newVersion)
+    if(this.versionFiles[0].type == FileType.GradleKotlin && this.versionName && this.versionCode) {
+      let newContent = this.versionFiles[0].content.replace(Regex.VersionNameKotlin, this.versionName.new)
+      newContent = newContent.replace(Regex.VersionCodeKotlin, this.versionCode.new)
+      await this.window.api.writeFile(this.versionFiles[0].path, newContent)
+      await this.window.api.commitTagPush(this.selectedFolderPath?.path, this.versionName.new)
     }
 
-    if(this.fileObjects[0].type == FileType.Package && this.version) {
-      let newContent = this.fileObjects[0].content.replace(versionRegex, this.version.newVersion)
-      let newContentPackageLock = this.fileObjects[1].content.replace(versionRegex, this.version.newVersion)
-      await this.window.api.writeVersionFileContent(this.selectedPath, [newContent, newContentPackageLock])
-      await this.window.api.commitTagPush(this.selectedPath, this.version.newVersion)
+    if(this.versionFiles[0].type == FileType.Package && this.versionFiles[1].type == FileType.PackageLock && this.version) {
+      let newContent = this.versionFiles[0].content.replace(Regex.VersionRegex, this.version.new)
+      let newContentPackageLock = this.versionFiles[1].content.replace(Regex.VersionRegex, this.version.new)
+      await this.window.api.writeFile(this.versionFiles[0].path, newContent)
+      await this.window.api.writeFile(this.versionFiles[1].path, newContentPackageLock)
+      await this.window.api.commitTagPush(this.selectedFolderPath?.path, this.version.new)
     }
 
     await this.onPathChange()

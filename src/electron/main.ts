@@ -4,8 +4,8 @@ import fs from 'fs'
 import { execSync } from 'child_process'
 import { autoUpdater } from "electron-updater"
 import url from 'url';
-import { FileType } from '../app/constants/enums';
-import { FileObject } from '../app/constants/interfaces';
+import { FileType, ProjectType } from '../app/constants/enums';
+import { FolderPath, VersionFile } from '../app/constants/interfaces';
 
 if (process.platform === 'win32') {
   app.setAppUserModelId(app.name);
@@ -107,6 +107,7 @@ ipcMain.handle('addPath', (_event) => {
   const result = dialog.showOpenDialogSync({ properties: ['openDirectory'] })
   if (!result || !result.length) return 'No folder selected'
   const projectPath = result[0]
+
   const gradle = path.join(projectPath, 'app', FileType.Gradle)
   const gradleKt = path.join(projectPath, 'app', FileType.GradleKotlin)
   const myPackage = path.join(projectPath, FileType.Package)
@@ -115,69 +116,54 @@ ipcMain.handle('addPath', (_event) => {
   if(!fs.existsSync(gradle) && !fs.existsSync(gradleKt) && !fs.existsSync(myPackage) && !fs.existsSync(myPackageLock))
     return 'Could not find build.gradle | build.gradle.kts | package.json | package_lock.json'
 
+
   const projectsPaths = getFolderPaths()
-  if(projectsPaths.includes(projectPath)) return 'Path already exists'
-  projectsPaths.push(projectPath)
+
+  const existing = projectsPaths.find((obj) => { obj.path == projectPath })
+  if(existing) return 'Path already exists'
+
+  if(fs.existsSync(gradle)) {
+    const folderPath: FolderPath = { name: path.basename(projectPath), path: projectPath, type: ProjectType.Gradle , files: [{ path: gradle, type: FileType.Gradle }] }
+    projectsPaths.push(folderPath)
+  }
+
+  if(fs.existsSync(gradleKt)) {
+    const folderPath: FolderPath = { name: path.basename(projectPath), path: projectPath, type: ProjectType.Gradle , files: [{ path: gradleKt, type: FileType.GradleKotlin }] }
+    projectsPaths.push(folderPath)
+  }
+
+  if(fs.existsSync(myPackage) && fs.existsSync(myPackageLock)) {
+    const folderPath: FolderPath = { name: path.basename(projectPath), path: projectPath, type: ProjectType.Package , files: [{ path: myPackage, type: FileType.Package }, { path: myPackageLock, type: FileType.PackageLock }] }
+    projectsPaths.push(folderPath)
+  }
+
   writeFolderPaths(projectsPaths)
   return 'success'
 })
 
 ipcMain.handle('deletePath', (_event, projectPath: string) => {
   let projectsPaths = getFolderPaths()
-  projectsPaths = projectsPaths.filter((path: string) => path != projectPath)
+  projectsPaths = projectsPaths.filter((folderPath: FolderPath) => folderPath.path != projectPath)
   writeFolderPaths(projectsPaths)
   return 'success'
 })
 
-ipcMain.handle('getVersionFileObj', (_event, projectPath: string) => {
-  const gradle = path.join(projectPath, 'app', FileType.Gradle)
-  const gradleKt = path.join(projectPath, 'app', FileType.GradleKotlin)
-  const myPackage = path.join(projectPath, FileType.Package)
-  const myPackageLock = path.join(projectPath, FileType.PackageLock)
-
-  const arObj = []
-
-  if (fs.existsSync(gradle)){
-    const obj: FileObject = { content: fs.readFileSync(gradle, 'utf8'), type: FileType.Gradle }
-    arObj.push(obj)
+ipcMain.handle('getVersionFiles', (_event, folderPath: FolderPath) => {
+  if(folderPath.type == ProjectType.Gradle) {
+      const versionFile: VersionFile = { content: fs.readFileSync(folderPath.files[0].path, 'utf8'), ...folderPath.files[0] }
+      return [versionFile]
+  }
+  if(folderPath.type == ProjectType.Package) {
+    const packageFile: VersionFile = { content: fs.readFileSync(folderPath.files[0].path, 'utf8'), ...folderPath.files[0] }
+    const packageLockFile: VersionFile = { content: fs.readFileSync(folderPath.files[1].path, 'utf8'), ...folderPath.files[1] }
+    return [packageFile, packageLockFile]
   }
 
-  if (fs.existsSync(gradleKt)){
-    const obj: FileObject = { content: fs.readFileSync(gradleKt, 'utf8'), type: FileType.GradleKotlin }
-    arObj.push(obj)
-  }
-
-  if (fs.existsSync(myPackage)){
-    const obj: FileObject = { content: fs.readFileSync(myPackage, 'utf8'), type: FileType.Package }
-    arObj.push(obj)
-  }
-
-  if (fs.existsSync(myPackageLock)){
-    const obj: FileObject = { content: fs.readFileSync(myPackageLock, 'utf8'), type: FileType.PackageLock }
-    arObj.push(obj)
-  }
-
-  return arObj
+  return
 })
 
-ipcMain.handle('writeVersionFileContent', (_event, projectPath: string, contents: string[]) => {
-  const gradle = path.join(projectPath, 'app', FileType.Gradle)
-  const gradleKt = path.join(projectPath, 'app', FileType.GradleKotlin)
-  const myPackage = path.join(projectPath, FileType.Package)
-  const myPackageLock = path.join(projectPath, FileType.PackageLock)
-
-  if (fs.existsSync(gradle)){ 
-    fs.writeFileSync(gradle, contents[0])
-  }
-
-  if(fs.existsSync(gradleKt)){
-    fs.writeFileSync(gradleKt, contents[0])
-  }
-
-  if(fs.existsSync(myPackage) && fs.existsSync(myPackageLock)){
-    fs.writeFileSync(myPackage, contents[0])
-    fs.writeFileSync(myPackageLock, contents[1])
-  }
+ipcMain.handle('writeFile', (_event, filePath: string, content: string) => {
+  fs.writeFileSync(filePath, content)
   return 'success'
 })
 
@@ -189,22 +175,14 @@ ipcMain.handle('commitTagPush', (_event, projectPath: string, version: string) =
   execSync('git push --tags', { cwd: projectPath })
 })
 
-ipcMain.handle('checkStatus', (_event, projectPath: string) => {
-  const result = execSync('git status', { cwd: projectPath }).toString()
-  if(!result.includes('nothing to commit')) return "uncomitted_changes"
-  const result2 = execSync('git push', { cwd: projectPath }).toString()
-  if(!result2.includes('up-to-date')) return "cant_push"
-  return 'ok'
-})
-
 const pathsFilePath = path.join(app.getPath("userData"), "paths.json")
 const getFolderPaths = () => {
   if(!fs.existsSync(pathsFilePath))
     fs.writeFileSync(pathsFilePath, "[]")
   const jsonString = fs.readFileSync(pathsFilePath, 'utf8')
-  return JSON.parse(jsonString||"[]")
+  return JSON.parse(jsonString||"[]") as FolderPath[]
 }
 
-const writeFolderPaths = (folderPaths: any) => {
+const writeFolderPaths = (folderPaths: FolderPath[]) => {
   fs.writeFileSync(pathsFilePath, JSON.stringify(folderPaths))
 }

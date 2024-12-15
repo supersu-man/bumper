@@ -5,6 +5,11 @@ export enum FileType {
     PackageLock = 'package-lock.json'
 }
 
+export enum ProjectType {
+    Gradle = 'gradle',
+    Package = 'package',
+}
+
 export enum BumpType {
     Major,
     Minor,

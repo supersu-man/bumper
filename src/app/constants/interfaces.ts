@@ -1,11 +1,22 @@
-import { FileType } from "./enums"
+import { FileType, ProjectType } from "./enums"
 
-export interface VersionType {
-    currentVersion: string,
-    newVersion: string
+export interface Version {
+    current: string,
+    new: string
 }
 
-export interface FileObject {
-    content: string,
+export interface VersionFile extends FilePath{
+    content: string
+}
+
+export interface FilePath {
+    path: string
     type: FileType
+}
+
+export interface FolderPath {
+    path: string,
+    name: string,
+    type: ProjectType,
+    files: FilePath[]
 }
