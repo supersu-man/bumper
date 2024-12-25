@@ -4,5 +4,5 @@ import { HomeComponent } from './home/home.component';
 
 export const routes: Routes = [
     { path: "", component: HomeComponent },
-    { path: "testing", component: UpdateWindowComponent }
+    { path: "update", component: UpdateWindowComponent }
 ];

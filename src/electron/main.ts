@@ -26,9 +26,9 @@ autoUpdater.checkForUpdatesAndNotify()
 
 let mainWindow: Electron.BrowserWindow;
 let updateWindow: Electron.BrowserWindow;
-const assetsPath = process.argv.includes('--dev') ? '../src/assets' : 'browser/assets'
+const assetsPath = process.argv.includes('--dev') ? '../src/assets' : '../browser/assets'
 const indexUrl = url.format({
-  pathname: path.join(__dirname, 'browser/index.html'),
+  pathname: path.join(__dirname, '../browser/index.html'),
   protocol: 'file',
   slashes: true,
   hash: '#'
@@ -71,10 +71,10 @@ function createUpdateWindow() {
   });
   updateWindow.removeMenu()
   if(process.argv.includes('--dev')) {
-    updateWindow.loadURL('http://localhost:4200/#/testing')
+    updateWindow.loadURL('http://localhost:4200/#/update')
     updateWindow.webContents.openDevTools()
   } else {
-    updateWindow.loadURL(indexUrl + '/testing')
+    updateWindow.loadURL(indexUrl + '/update')
   }
 
   updateWindow.on('closed', () => {
