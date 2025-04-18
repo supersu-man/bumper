@@ -119,7 +119,7 @@ ipcMain.handle('addPath', (_event) => {
 
   const projectsPaths = getFolderPaths()
 
-  const existing = projectsPaths.find((obj) => { obj.path == projectPath })
+  const existing = projectsPaths.find((obj) => { return obj.path == projectPath })
   if(existing) return 'Path already exists'
 
   if(fs.existsSync(gradle)) {
