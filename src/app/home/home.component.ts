@@ -54,6 +54,10 @@ export class HomeComponent {
   deleteProjectPath = async () => {
     await this.window.api.deletePath(this.selectedFolderPath?.path)
     this.selectedFolderPath = undefined
+    this.versionCode = undefined
+    this.versionName = undefined
+    this.version = undefined
+    this.versionFiles = []
     this.getProjectPaths()
   }
 
