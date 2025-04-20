@@ -105,7 +105,7 @@ ipcMain.handle('getPaths', () => {
 
 ipcMain.handle('addPath', (_event) => {
   const result = dialog.showOpenDialogSync({ properties: ['openDirectory'] })
-  if (!result || !result.length) return 'No folder selected'
+  if (!result || !result.length) return { error: true, message: 'No folder selected' }
   const projectPath = result[0]
 
   const gradle = path.join(projectPath, 'app', FileType.Gradle)
@@ -114,31 +114,32 @@ ipcMain.handle('addPath', (_event) => {
   const myPackageLock = path.join(projectPath, FileType.PackageLock)
 
   if(!fs.existsSync(gradle) && !fs.existsSync(gradleKt) && !fs.existsSync(myPackage) && !fs.existsSync(myPackageLock))
-    return 'Could not find build.gradle | build.gradle.kts | package.json | package_lock.json'
-
+    return { error: true, message: 'Could not find build.gradle | build.gradle.kts | package.json | package_lock.json' }
 
   const projectsPaths = getFolderPaths()
 
   const existing = projectsPaths.find((obj) => { return obj.path == projectPath })
-  if(existing) return 'Path already exists'
+  if(existing) return { error: true, message: 'Path already exists' }
+
+  var folderPath: FolderPath | undefined
 
   if(fs.existsSync(gradle)) {
-    const folderPath: FolderPath = { name: path.basename(projectPath), path: projectPath, type: ProjectType.Gradle , files: [{ path: gradle, type: FileType.Gradle }] }
+    folderPath = { name: path.basename(projectPath), path: projectPath, type: ProjectType.Gradle , files: [{ path: gradle, type: FileType.Gradle }] }
     projectsPaths.push(folderPath)
   }
 
   if(fs.existsSync(gradleKt)) {
-    const folderPath: FolderPath = { name: path.basename(projectPath), path: projectPath, type: ProjectType.Gradle , files: [{ path: gradleKt, type: FileType.GradleKotlin }] }
+    folderPath = { name: path.basename(projectPath), path: projectPath, type: ProjectType.Gradle , files: [{ path: gradleKt, type: FileType.GradleKotlin }] }
     projectsPaths.push(folderPath)
   }
 
   if(fs.existsSync(myPackage) && fs.existsSync(myPackageLock)) {
-    const folderPath: FolderPath = { name: path.basename(projectPath), path: projectPath, type: ProjectType.Package , files: [{ path: myPackage, type: FileType.Package }, { path: myPackageLock, type: FileType.PackageLock }] }
+    folderPath = { name: path.basename(projectPath), path: projectPath, type: ProjectType.Package , files: [{ path: myPackage, type: FileType.Package }, { path: myPackageLock, type: FileType.PackageLock }] }
     projectsPaths.push(folderPath)
   }
 
   writeFolderPaths(projectsPaths)
-  return 'success'
+  return { error: false, folderPath }
 })
 
 ipcMain.handle('deletePath', (_event, projectPath: string) => {

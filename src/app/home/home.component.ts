@@ -49,7 +49,6 @@ export class HomeComponent {
 
   getProjectPaths = async () => {
     this.folderPaths = await this.window.api.getPaths()
-    console.log(this.folderPaths)
   }
 
   deleteProjectPath = async () => {
@@ -60,20 +59,26 @@ export class HomeComponent {
 
   openProjectDialog = async () => {
     const result = await this.window.api.addPath()
-    if(result != "success") 
-      this.messageService.add({ severity: 'error', summary: 'Error', detail: result });
-    this.getProjectPaths()
+    if(result.error) {
+      return this.messageService.add({ severity: 'error', summary: 'Error', detail: result.message });
+    }
+    else {
+      this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Folder added' });
+    }
+    await this.getProjectPaths()
+    this.selectedFolderPath = result.folderPath
+    this.onPathChange()
   }
 
   onPathChange = async () => {
     if(!this.selectedFolderPath) return
 
-    console.log(this.selectedFolderPath)
-    this.versionFiles = await this.window.api.getVersionFiles(this.selectedFolderPath)
-    
-    if(this.versionFiles.length==0) {
+    const versionFiles = await this.window.api.getVersionFiles(this.selectedFolderPath)    
+    if(!versionFiles || versionFiles.length==0) {
       return this.messageService.add({ severity: 'error', summary: 'Error', detail: "Supported files not found in project" });
     }
+
+    this.versionFiles = versionFiles
 
     if(this.versionFiles[0].type == FileType.Gradle) {
       const currentVersionName = Regex.VersionNameGradle.exec(this.versionFiles[0].content)?.[0] as string
@@ -93,8 +98,6 @@ export class HomeComponent {
       const currentVersion = Regex.VersionRegex.exec(this.versionFiles[0].content)?.[0] as string
       this.version = { current: currentVersion, new: this.bumpversion(currentVersion, this.selectedBumpOption) }
     }
-    
-    console.log(this.versionFiles)
   }
 
   bumpversion = (version: string, bumpType: BumpType) => {
