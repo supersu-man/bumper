@@ -133,10 +133,16 @@ export class HomeComponent {
     }
 
     if(this.versionFiles[0].type == FileType.Package && this.versionFiles[1].type == FileType.PackageLock && this.version) {
-      let newContent = this.versionFiles[0].content.replace(Regex.VersionRegex, this.version.new)
-      let newContentPackageLock = this.versionFiles[1].content.replace(Regex.VersionRegex, this.version.new)
+      const newContent = this.versionFiles[0].content.replace(Regex.VersionRegex, this.version.new)
+
+      const parts = this.versionFiles[1].content.split('"packages"');
+      parts[0] = parts[0].replace(Regex.VersionRegex, this.version.new)
+      parts[1] = parts[1].replace(Regex.VersionRegex, this.version.new)
+      const newContentPackageLock = parts.join('"packages"')
+
       await this.window.api.writeFile(this.versionFiles[0].path, newContent)
       await this.window.api.writeFile(this.versionFiles[1].path, newContentPackageLock)
+
       await this.window.api.commitTagPush(this.selectedFolderPath?.path, this.version.new)
     }
 
