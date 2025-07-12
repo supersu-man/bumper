@@ -9,11 +9,10 @@ import { Regex } from '../constants/regex';
 import { FolderPath, Version, VersionFile } from '../constants/interfaces';
 
 @Component({
-  selector: 'app-home',
-  standalone: true,
-  imports: [DropdownModule, ButtonModule, FormsModule, SelectButtonModule],
-  templateUrl: './home.component.html',
-  styles: ``
+    selector: 'app-home',
+    imports: [DropdownModule, ButtonModule, FormsModule, SelectButtonModule],
+    templateUrl: './home.component.html',
+    styles: ``
 })
 export class HomeComponent {
 
