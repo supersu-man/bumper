@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { DropdownModule } from 'primeng/dropdown';
+import { AutoCompleteCompleteEvent, AutoCompleteModule } from 'primeng/autocomplete';
 import { ButtonModule } from 'primeng/button';
 import { FormsModule } from '@angular/forms';
 import { SelectButtonModule } from 'primeng/selectbutton';
@@ -10,7 +10,7 @@ import { FolderPath, Version, VersionFile } from '../constants/interfaces';
 
 @Component({
     selector: 'app-home',
-    imports: [DropdownModule, ButtonModule, FormsModule, SelectButtonModule],
+    imports: [AutoCompleteModule, ButtonModule, FormsModule, SelectButtonModule],
     templateUrl: './home.component.html',
     styles: ``
 })
@@ -48,6 +48,7 @@ export class HomeComponent {
 
   getProjectPaths = async () => {
     this.folderPaths = await this.window.api.getPaths()
+    console.log(this.folderPaths)
   }
 
   deleteProjectPath = async () => {

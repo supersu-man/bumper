@@ -6,7 +6,10 @@
     }
     <div class="grid align-items-center mb-4">
         <div class="col">
-            <p-dropdown styleClass="w-full" [(ngModel)]="selectedFolderPath" [options]="folderPaths" optionLabel="path" placeholder="Select a project path" (onChange)="selectedBumpOption=htmlTypes.BumpType.Minor;onPathChange()"/>
+            <p-autoComplete [readonly]="true" styleClass="w-full" optionLabel="path" [dropdown]="true"
+                [(ngModel)]="selectedFolderPath" [suggestions]="folderPaths" (completeMethod)="getProjectPaths()"
+                placeholder="Select a project path" (onSelect)="selectedBumpOption = htmlTypes.BumpType.Minor; onPathChange()"
+            />
         </div>
         @if (selectedFolderPath) {
         <div class="col-fixed">
