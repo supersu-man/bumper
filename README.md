@@ -1,4 +1,7 @@
-# Bumper
+<div align="center">
+    <img src="src/assets/icon.png" width="100">
+    <h1>Bumper</h1>
+</div>
 
 Bumper is an Electron app that automates version bumping for Android and Node.js projects, ensuring consistent and hassle-free version management.
 
