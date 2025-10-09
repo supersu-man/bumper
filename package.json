@@ -1,7 +1,7 @@
 {
   "name": "bumper",
   "version": "2.1.1",
-  "main": "build/electron/main.js",
+  "main": "build/main.js",
   "author": {
     "name": "Sumanth Perambuduri",
     "email": "sumanthpera444@gmail.com"
@@ -9,15 +9,12 @@
   "description": "Bumps Android Project version",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
-    "electron-start": "npm run electron-build && electron ./build/electron/main.js --dev",
+    "angular-start": "ng serve",
+    "electron-start": "npm run electron-build && electron ./build/main.js --dev",
     "angular-build": "ng build --base-href",
     "electron-build": "tsc --project tsconfig.electron.json",
     "electron-package": "npm run angular-build && npm run electron-build && npx electron-builder --publish never",
-    "electron-publish": "npm run angular-build && npm run electron-build && npx electron-builder --publish always",
-    "patch": "npm version patch -m v%s && git push && git push --tags",
-    "minor": "npm version minor -m v%s && git push && git push --tags",
-    "major": "npm version major -m v%s && git push && git push --tags"
+    "electron-publish": "npm run angular-build && npm run electron-build && npx electron-builder --publish always"
   },
   "private": true,
   "dependencies": {
@@ -33,7 +30,7 @@
     "electron-updater": "^6.3.4",
     "primeflex": "^4.0.0",
     "primeicons": "^7.0.0",
-    "primeng": "^20.0.0-rc.1",
+    "primeng": "^20.2.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.1"
@@ -42,8 +39,8 @@
     "@angular/build": "^20.1.0",
     "@angular/cli": "^20.1.0",
     "@angular/compiler-cli": "^20.1.0",
-    "electron": "^32.0.1",
-    "electron-builder": "^24.13.3",
+    "electron": "^38.2.2",
+    "electron-builder": "^26.0.12",
     "typescript": "~5.8.3"
   },
   "build": {

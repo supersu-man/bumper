@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron'
-import { FolderPath } from '../app/constants/interfaces'
+import { FolderPath } from './interfaces'
 // Expose ipcRenderer.invoke via preload
 contextBridge.exposeInMainWorld('api', {
     getPaths: () => ipcRenderer.invoke('getPaths'),

@@ -3,9 +3,9 @@ import path from 'path';
 import fs from 'fs'
 import { execSync } from 'child_process'
 import { autoUpdater } from "electron-updater"
-import url from 'url';
-import { FileType, ProjectType } from '../app/constants/enums';
-import { FolderPath, VersionFile } from '../app/constants/interfaces';
+import { FileType, ProjectType } from './enums';
+import { FolderPath, VersionFile } from './interfaces';
+import { getAppUrl, getAssetUrl, resolveElectronPath } from './utility';
 
 if (process.platform === 'win32') {
   app.setAppUserModelId(app.name);
@@ -26,31 +26,25 @@ autoUpdater.checkForUpdatesAndNotify()
 
 let mainWindow: Electron.BrowserWindow;
 let updateWindow: Electron.BrowserWindow;
-const assetsPath = process.argv.includes('--dev') ? '../src/assets' : '../browser/assets'
-const indexUrl = url.format({
-  pathname: path.join(__dirname, '../browser/index.html'),
-  protocol: 'file',
-  slashes: true,
-  hash: '#'
-})
 
 function createMainWindow() {
   mainWindow = new BrowserWindow({
     height: 600,
     width: 1000,
     title: "Bumper",
+    icon: getAssetUrl('favicon.ico'),
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js')
+      preload: resolveElectronPath('preload.js')
     },
-    icon: path.join(__dirname, assetsPath + '/icon.png')
   });
+
+  console.log(getAssetUrl('favicon.ico'))
+
   mainWindow.removeMenu()
-  if(process.argv.includes('--dev')) {
-    mainWindow.loadURL('http://localhost:4200/#')
-    mainWindow.webContents.openDevTools()
-  } else {
-    mainWindow.loadURL(indexUrl)
-  }
+  // mainWindow.webContents.openDevTools()
+
+  const route = getAppUrl()
+  mainWindow.loadURL(route)
 
   mainWindow.on('closed', () => {
     mainWindow.destroy()
@@ -64,18 +58,14 @@ function createUpdateWindow() {
     resizable: false,
     closable: false,
     title: "Update found",
+    icon: getAssetUrl("favicon.ico"),
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js')
+      preload: resolveElectronPath('preload.js')
     },
-    icon: path.join(__dirname, assetsPath + '/icon.png')
   });
   updateWindow.removeMenu()
-  if(process.argv.includes('--dev')) {
-    updateWindow.loadURL('http://localhost:4200/#/update')
-    updateWindow.webContents.openDevTools()
-  } else {
-    updateWindow.loadURL(indexUrl + '/update')
-  }
+  const route = getAppUrl('update')
+  updateWindow.loadURL(route)
 
   updateWindow.on('closed', () => {
     updateWindow.destroy()
@@ -113,28 +103,28 @@ ipcMain.handle('addPath', (_event) => {
   const myPackage = path.join(projectPath, FileType.Package)
   const myPackageLock = path.join(projectPath, FileType.PackageLock)
 
-  if(!fs.existsSync(gradle) && !fs.existsSync(gradleKt) && !fs.existsSync(myPackage) && !fs.existsSync(myPackageLock))
+  if (!fs.existsSync(gradle) && !fs.existsSync(gradleKt) && !fs.existsSync(myPackage) && !fs.existsSync(myPackageLock))
     return { error: true, message: 'Could not find build.gradle | build.gradle.kts | package.json | package_lock.json' }
 
   const projectsPaths = getFolderPaths()
 
   const existing = projectsPaths.find((obj) => { return obj.path == projectPath })
-  if(existing) return { error: true, message: 'Path already exists' }
+  if (existing) return { error: true, message: 'Path already exists' }
 
   var folderPath: FolderPath | undefined
 
-  if(fs.existsSync(gradle)) {
-    folderPath = { name: path.basename(projectPath), path: projectPath, type: ProjectType.Gradle , files: [{ path: gradle, type: FileType.Gradle }] }
+  if (fs.existsSync(gradle)) {
+    folderPath = { name: path.basename(projectPath), path: projectPath, type: ProjectType.Gradle, files: [{ path: gradle, type: FileType.Gradle }] }
     projectsPaths.push(folderPath)
   }
 
-  if(fs.existsSync(gradleKt)) {
-    folderPath = { name: path.basename(projectPath), path: projectPath, type: ProjectType.Gradle , files: [{ path: gradleKt, type: FileType.GradleKotlin }] }
+  if (fs.existsSync(gradleKt)) {
+    folderPath = { name: path.basename(projectPath), path: projectPath, type: ProjectType.Gradle, files: [{ path: gradleKt, type: FileType.GradleKotlin }] }
     projectsPaths.push(folderPath)
   }
 
-  if(fs.existsSync(myPackage) && fs.existsSync(myPackageLock)) {
-    folderPath = { name: path.basename(projectPath), path: projectPath, type: ProjectType.Package , files: [{ path: myPackage, type: FileType.Package }, { path: myPackageLock, type: FileType.PackageLock }] }
+  if (fs.existsSync(myPackage) && fs.existsSync(myPackageLock)) {
+    folderPath = { name: path.basename(projectPath), path: projectPath, type: ProjectType.Package, files: [{ path: myPackage, type: FileType.Package }, { path: myPackageLock, type: FileType.PackageLock }] }
     projectsPaths.push(folderPath)
   }
 
@@ -150,11 +140,11 @@ ipcMain.handle('deletePath', (_event, projectPath: string) => {
 })
 
 ipcMain.handle('getVersionFiles', (_event, folderPath: FolderPath) => {
-  if(folderPath.type == ProjectType.Gradle) {
-      const versionFile: VersionFile = { content: fs.readFileSync(folderPath.files[0].path, 'utf8'), ...folderPath.files[0] }
-      return [versionFile]
+  if (folderPath.type == ProjectType.Gradle) {
+    const versionFile: VersionFile = { content: fs.readFileSync(folderPath.files[0].path, 'utf8'), ...folderPath.files[0] }
+    return [versionFile]
   }
-  if(folderPath.type == ProjectType.Package) {
+  if (folderPath.type == ProjectType.Package) {
     const packageFile: VersionFile = { content: fs.readFileSync(folderPath.files[0].path, 'utf8'), ...folderPath.files[0] }
     const packageLockFile: VersionFile = { content: fs.readFileSync(folderPath.files[1].path, 'utf8'), ...folderPath.files[1] }
     return [packageFile, packageLockFile]
@@ -171,17 +161,17 @@ ipcMain.handle('writeFile', (_event, filePath: string, content: string) => {
 ipcMain.handle('commitTagPush', (_event, projectPath: string, version: string) => {
   execSync('git add -A', { cwd: projectPath })
   execSync(`git commit -m v${version}`, { cwd: projectPath })
-  execSync(`git tag v${version}`, { cwd: projectPath })
-  execSync('git push', { cwd: projectPath })
-  execSync('git push --tags', { cwd: projectPath })
+  // execSync(`git tag v${version}`, { cwd: projectPath })
+  // execSync('git push', { cwd: projectPath })
+  // execSync('git push --tags', { cwd: projectPath })
 })
 
 const pathsFilePath = path.join(app.getPath("userData"), "paths.json")
 const getFolderPaths = () => {
-  if(!fs.existsSync(pathsFilePath))
+  if (!fs.existsSync(pathsFilePath))
     fs.writeFileSync(pathsFilePath, "[]")
   const jsonString = fs.readFileSync(pathsFilePath, 'utf8')
-  return JSON.parse(jsonString||"[]") as FolderPath[]
+  return JSON.parse(jsonString || "[]") as FolderPath[]
 }
 
 const writeFolderPaths = (folderPaths: FolderPath[]) => {

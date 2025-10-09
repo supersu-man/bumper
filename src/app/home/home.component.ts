@@ -4,9 +4,9 @@ import { ButtonModule } from 'primeng/button';
 import { FormsModule } from '@angular/forms';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { MessageService } from 'primeng/api';
-import { BumpType, FileType, ProjectType } from '../constants/enums';
+import { BumpType, FileType, ProjectType } from '../../electron/enums';
 import { Regex } from '../constants/regex';
-import { FolderPath, Version, VersionFile } from '../constants/interfaces';
+import { FolderPath, Version, VersionFile } from '../../electron/interfaces';
 
 @Component({
     selector: 'app-home',

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BumpType } from '../constants/enums';
+import { BumpType } from '../../electron/enums';
 
 @Injectable({
   providedIn: 'root'
