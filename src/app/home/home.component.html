@@ -49,7 +49,7 @@
                 <p-selectButton [options]="bumpOptions" [(ngModel)]="selectedBumpOption"  optionLabel="label" optionValue="value" (onChange)="onPathChange(false)" />
             </div>
         </div>
-        <div class="grid justify-content-center">
+        <div class="grid justify-content-center mb-4">
             <div class="col-fixed" style="width: 400px;">
                 @if (versionFiles[0].type == htmlTypes.FileType.Gradle || versionFiles[0].type == htmlTypes.FileType.GradleKotlin) {
                     <div class="grid">
@@ -75,9 +75,14 @@
                 }
             </div>
         </div>
+        <div class="grid justify-content-center mb-8">
+            <div class="col-fixed" style="width: 200px;">
+                <p-button label="Bump" [fluid]="true" (click)="bumpProject()"/>
+            </div>
+        </div>
         <div class="grid justify-content-center">
-            <div class="col-fixed">
-                <p-button label="Bump" (click)="bumpProject()"/>
+            <div class="col-fixed" style="width: 200px;">
+                <p-button severity="danger" label="Revert Previous" [fluid]="true" (click)="revert()"/>
             </div>
         </div>
     } @else {

@@ -1,7 +1,7 @@
 import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import path from 'path';
 import fs from 'fs'
-import { execSync } from 'child_process'
+import { exec, execSync } from 'child_process'
 import { autoUpdater } from "electron-updater"
 import { FileType, ProjectType } from './enums';
 import { FolderPath, VersionFile } from './interfaces';
@@ -167,14 +167,21 @@ ipcMain.handle('commitTagPush', (_event, projectPath: string, version: string) =
 ipcMain.handle('gitStatus', (_, projectPath: string) => {
   const status = execSync('git status --porcelain', { cwd: projectPath, encoding: 'utf8' }).trim();
   if (status.length > 0) return 1
-
   const st = execSync('git status -uno', { cwd: projectPath, encoding: 'utf8' });
   if (!st.includes('up to date')) return 2;
-
   const pushOutput = execSync('git push 2>&1', { cwd: projectPath, encoding: 'utf8' });
   if (!pushOutput.includes('Everything up-to-date')) return 3;
-  
   return 5
+})
+
+ipcMain.handle('revertRelease', (_, projectPath: string) => {
+  const res1 = execSync('git describe --tags --abbrev=0', { cwd: projectPath, encoding: 'utf8' });
+  const res2 = execSync('git log -1 --pretty=%s', { cwd: projectPath, encoding: 'utf8' });
+  if (res1 != res2) return
+  execSync(`git tag -d ${res1}`, { cwd: projectPath, encoding: 'utf8' })
+  execSync(`git push origin --delete ${res1}`, { cwd: projectPath, encoding: 'utf8' })
+  execSync('git reset --hard HEAD~1', { cwd: projectPath, encoding: 'utf8' })
+  execSync('git push --force origin', { cwd: projectPath, encoding: 'utf8' })
 })
 
 const pathsFilePath = path.join(app.getPath("userData"), "paths.json")

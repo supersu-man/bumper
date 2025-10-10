@@ -9,6 +9,8 @@ contextBridge.exposeInMainWorld('api', {
     writeFile: (projectPath: string, content: string) => ipcRenderer.invoke('writeFile', projectPath, content),
     gitStatus: (projectPath: string) => ipcRenderer.invoke('gitStatus', projectPath),
     commitTagPush: (projectPath: string, version: string) => ipcRenderer.invoke('commitTagPush', projectPath, version),
+    revertRelease: (projectPath: string) => ipcRenderer.invoke('revertRelease', projectPath),
+
 
     onUpdateProgress: (callback: (value: string) => void) => ipcRenderer.on("updateProgess", (_event, value) => callback(value))
 })

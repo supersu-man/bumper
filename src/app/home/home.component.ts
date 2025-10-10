@@ -110,6 +110,10 @@ export class HomeComponent {
     }
   }
 
+  revert = async () => {
+    await this.window.api.revertRelease(this.selectedFolderPath?.path)
+  }
+
   bumpversion = (version: string, bumpType: BumpType) => {
     const ar = version.split('.')
     if (ar.length == 3) {
