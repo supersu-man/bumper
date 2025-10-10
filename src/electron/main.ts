@@ -38,8 +38,6 @@ function createMainWindow() {
     },
   });
 
-  console.log(getAssetUrl('favicon.ico'))
-
   mainWindow.removeMenu()
   // mainWindow.webContents.openDevTools()
 
@@ -161,9 +159,22 @@ ipcMain.handle('writeFile', (_event, filePath: string, content: string) => {
 ipcMain.handle('commitTagPush', (_event, projectPath: string, version: string) => {
   execSync('git add -A', { cwd: projectPath })
   execSync(`git commit -m v${version}`, { cwd: projectPath })
-  // execSync(`git tag v${version}`, { cwd: projectPath })
-  // execSync('git push', { cwd: projectPath })
-  // execSync('git push --tags', { cwd: projectPath })
+  execSync(`git tag v${version}`, { cwd: projectPath })
+  execSync('git push', { cwd: projectPath })
+  execSync('git push --tags', { cwd: projectPath })
+})
+
+ipcMain.handle('gitStatus', (_, projectPath: string) => {
+  const status = execSync('git status --porcelain', { cwd: projectPath, encoding: 'utf8' }).trim();
+  if (status.length > 0) return 1
+
+  const st = execSync('git status -uno', { cwd: projectPath, encoding: 'utf8' });
+  if (!st.includes('up to date')) return 2;
+
+  const pushOutput = execSync('git push 2>&1', { cwd: projectPath, encoding: 'utf8' });
+  if (!pushOutput.includes('Everything up-to-date')) return 3;
+  
+  return 5
 })
 
 const pathsFilePath = path.join(app.getPath("userData"), "paths.json")

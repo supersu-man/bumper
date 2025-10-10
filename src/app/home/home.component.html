@@ -20,10 +20,33 @@
             <p-button icon="pi pi-plus" (click)="openProjectDialog()"/>
         </div>
     </div>
+    <div class="grid text-center mb-4">
+        <div class="col-4">
+            <div>No uncommitted changes</div>
+            <div class="mt-3">
+                @if (repoStatus > 1) { <i class="pi pi-check"></i> }
+                @else if (repoStatus == 1) { <i class="pi pi-times"></i> }
+            </div>
+        </div>
+        <div class="col-4">
+            <div>Branch up to date with remote</div>
+            <div class="mt-3">
+                @if (repoStatus > 2) { <i class="pi pi-check"></i> }
+                @else if (repoStatus == 2) { <i class="pi pi-times"></i> }
+            </div>
+        </div>
+        <div class="col-4">
+            <div>Permissions to push</div>
+            <div class="mt-3">
+                @if (repoStatus > 3) { <i class="pi pi-check"></i> }
+                @else if (repoStatus == 3) { <i class="pi pi-times"></i> }
+            </div>
+        </div>
+    </div>
     @if (versionFiles.length>0) {
         <div class="grid justify-content-center mb-4">
             <div class="col-fixed">
-                <p-selectButton [options]="bumpOptions" [(ngModel)]="selectedBumpOption"  optionLabel="label" optionValue="value" (onChange)="onPathChange()" />
+                <p-selectButton [options]="bumpOptions" [(ngModel)]="selectedBumpOption"  optionLabel="label" optionValue="value" (onChange)="onPathChange(false)" />
             </div>
         </div>
         <div class="grid justify-content-center">

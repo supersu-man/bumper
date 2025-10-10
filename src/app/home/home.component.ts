@@ -39,6 +39,7 @@ export class HomeComponent {
   ]
   selectedBumpOption = BumpType.Minor
 
+  repoStatus = 0
 
   constructor(private messageService: MessageService) {}
 
@@ -74,12 +75,17 @@ export class HomeComponent {
     this.onPathChange()
   }
 
-  onPathChange = async () => {
+  onPathChange = async (checkStatus: boolean = true) => {
     if(!this.selectedFolderPath) return
 
     const versionFiles = await this.window.api.getVersionFiles(this.selectedFolderPath)    
     if(!versionFiles || versionFiles.length==0) {
       return this.messageService.add({ severity: 'error', summary: 'Error', detail: "Supported files not found in project" });
+    }
+
+    if(checkStatus) {
+      const gitStatus = await this.window.api.gitStatus(this.selectedFolderPath?.path)
+      this.repoStatus = gitStatus
     }
 
     this.versionFiles = versionFiles
@@ -146,6 +152,6 @@ export class HomeComponent {
       await this.window.api.commitTagPush(this.selectedFolderPath?.path, this.version.new)
     }
 
-    await this.onPathChange()
+    await this.onPathChange(false)
   }
 }
