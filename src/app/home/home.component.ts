@@ -30,8 +30,6 @@ export class HomeComponent {
     BumpType: BumpType
   }
 
-  window = window as any
-
   bumpOptions = [
     { label: 'Major', value: BumpType.Major },
     { label: 'Minor', value: BumpType.Minor },
@@ -48,12 +46,13 @@ export class HomeComponent {
   }
 
   getProjectPaths = async () => {
-    this.folderPaths = await this.window.api.getPaths()
+    this.folderPaths = await window.api.getPaths()
     console.log(this.folderPaths)
   }
 
   deleteProjectPath = async () => {
-    await this.window.api.deletePath(this.selectedFolderPath?.path)
+    if(!this.selectedFolderPath) return
+    await window.api.deletePath(this.selectedFolderPath.path)
     this.selectedFolderPath = undefined
     this.versionCode = undefined
     this.versionName = undefined
@@ -63,7 +62,7 @@ export class HomeComponent {
   }
 
   openProjectDialog = async () => {
-    const result = await this.window.api.addPath()
+    const result = await window.api.addPath()
     if(result.error) {
       return this.messageService.add({ severity: 'error', summary: 'Error', detail: result.message });
     }
@@ -78,13 +77,13 @@ export class HomeComponent {
   onPathChange = async (checkStatus: boolean = true) => {
     if(!this.selectedFolderPath) return
 
-    const versionFiles = await this.window.api.getVersionFiles(this.selectedFolderPath)    
+    const versionFiles = await window.api.getVersionFiles(this.selectedFolderPath)    
     if(!versionFiles || versionFiles.length==0) {
       return this.messageService.add({ severity: 'error', summary: 'Error', detail: "Supported files not found in project" });
     }
 
     if(checkStatus) {
-      const gitStatus = await this.window.api.gitStatus(this.selectedFolderPath?.path)
+      const gitStatus = await window.api.gitStatus(this.selectedFolderPath?.path)
       this.repoStatus = gitStatus
     }
 
@@ -111,7 +110,8 @@ export class HomeComponent {
   }
 
   revert = async () => {
-    await this.window.api.revertRelease(this.selectedFolderPath?.path)
+    if(!this.selectedFolderPath) return
+    await window.api.revertRelease(this.selectedFolderPath.path)
   }
 
   bumpversion = (version: string, bumpType: BumpType) => {
@@ -128,18 +128,19 @@ export class HomeComponent {
   }
 
   bumpProject = async () => {
+    if(!this.selectedFolderPath) return 
     if(this.versionFiles[0].type == FileType.Gradle && this.versionName && this.versionCode) {
       let newContent = this.versionFiles[0].content.replace(Regex.VersionNameGradle, this.versionName.new)
       newContent = newContent.replace(Regex.VersionCodeGradle, this.versionCode.new)
-      await this.window.api.writeFile(this.versionFiles[0].path, newContent)
-      await this.window.api.commitTagPush(this.selectedFolderPath?.path, this.versionName.new)
+      await window.api.writeFile(this.versionFiles[0].path, newContent)
+      await window.api.commitTagPush(this.selectedFolderPath.path, this.versionName.new)
     }
 
     if(this.versionFiles[0].type == FileType.GradleKotlin && this.versionName && this.versionCode) {
       let newContent = this.versionFiles[0].content.replace(Regex.VersionNameKotlin, this.versionName.new)
       newContent = newContent.replace(Regex.VersionCodeKotlin, this.versionCode.new)
-      await this.window.api.writeFile(this.versionFiles[0].path, newContent)
-      await this.window.api.commitTagPush(this.selectedFolderPath?.path, this.versionName.new)
+      await window.api.writeFile(this.versionFiles[0].path, newContent)
+      await window.api.commitTagPush(this.selectedFolderPath.path, this.versionName.new)
     }
 
     if(this.versionFiles[0].type == FileType.Package && this.versionFiles[1].type == FileType.PackageLock && this.version) {
@@ -150,10 +151,10 @@ export class HomeComponent {
       parts[1] = parts[1].replace(Regex.VersionRegex, this.version.new)
       const newContentPackageLock = parts.join('"packages"')
 
-      await this.window.api.writeFile(this.versionFiles[0].path, newContent)
-      await this.window.api.writeFile(this.versionFiles[1].path, newContentPackageLock)
+      await window.api.writeFile(this.versionFiles[0].path, newContent)
+      await window.api.writeFile(this.versionFiles[1].path, newContentPackageLock)
 
-      await this.window.api.commitTagPush(this.selectedFolderPath?.path, this.version.new)
+      await window.api.commitTagPush(this.selectedFolderPath.path, this.version.new)
     }
 
     await this.onPathChange(false)

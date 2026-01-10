@@ -1,8 +1,9 @@
+
 import { contextBridge, ipcRenderer } from 'electron'
-import { FolderPath } from './interfaces'
-// Expose ipcRenderer.invoke via preload
-contextBridge.exposeInMainWorld('api', {
-    getPaths: () => ipcRenderer.invoke('getPaths'),
+import { FolderPath, ElectronAPI } from './interfaces'
+
+const api: ElectronAPI = {
+    getPaths: () => ipcRenderer.invoke(IpcChannel.GetPaths),
     addPath: () => ipcRenderer.invoke('addPath'),
     deletePath: (projectPath: string) => ipcRenderer.invoke('deletePath', projectPath),
     getVersionFiles: (projectPath: FolderPath) => ipcRenderer.invoke('getVersionFiles', projectPath),
@@ -11,6 +12,19 @@ contextBridge.exposeInMainWorld('api', {
     commitTagPush: (projectPath: string, version: string) => ipcRenderer.invoke('commitTagPush', projectPath, version),
     revertRelease: (projectPath: string) => ipcRenderer.invoke('revertRelease', projectPath),
 
+    onUpdateProgress: (callback: (progress: number) => void) => ipcRenderer.on("updateProgess", (_event, progress) => callback(progress))
+}
 
-    onUpdateProgress: (callback: (value: string) => void) => ipcRenderer.on("updateProgess", (_event, value) => callback(value))
-})
+contextBridge.exposeInMainWorld('api',  api)
+
+export enum IpcChannel {
+  GetPaths = 'getPaths',
+  AddPath = 'addPath',
+  DeletePath = 'deletePath',
+  GetVersionFiles = 'getVersionFiles',
+  WriteFile = 'writeFile',
+  GitStatus = 'gitStatus',
+  CommitTagPush = 'commitTagPush',
+  RevertRelease = 'revertRelease',
+  UpdateProgress = 'updateProgess',
+}

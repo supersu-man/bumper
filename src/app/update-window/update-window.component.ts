@@ -2,10 +2,10 @@ import { Component, NgZone, OnInit } from '@angular/core';
 import { ProgressBarModule } from 'primeng/progressbar';
 
 @Component({
-    selector: 'app-update-window',
-    imports: [ProgressBarModule],
-    templateUrl: './update-window.component.html',
-    styles: ``
+  selector: 'app-update-window',
+  imports: [ProgressBarModule],
+  templateUrl: './update-window.component.html',
+  styles: ``
 })
 export class UpdateWindowComponent implements OnInit {
 
