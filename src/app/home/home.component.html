@@ -1,95 +1,100 @@
 <div class="h-full p-4">
-    @if (selectedFolderPath) {
-        <div class="grid">
-            <div class="col">Project type: {{selectedFolderPath.type}}</div>
-        </div>
+    @if (selectedFolderPath()) {
+    <div class="grid">
+        <div class="col">Project type: {{selectedFolderPath()?.type}}</div>
+    </div>
     }
     <div class="grid align-items-center mb-4">
         <div class="col">
             <p-autoComplete [readonly]="true" styleClass="w-full" optionLabel="path" [dropdown]="true"
-                [(ngModel)]="selectedFolderPath" [suggestions]="folderPaths" (completeMethod)="getProjectPaths()"
-                placeholder="Select a project path" (onSelect)="selectedBumpOption = htmlTypes.BumpType.Minor; onPathChange()"
-            />
+                [ngModel]="selectedFolderPath()" (ngModelChange)="selectedFolderPath.set($event)"
+                [suggestions]="folderPaths()" (completeMethod)="getProjectPaths()" placeholder="Select a project path"
+                (onSelect)="selectedBumpOption.set(htmlTypes.BumpType.Minor); onPathChange()" />
         </div>
-        @if (selectedFolderPath) {
+        @if (selectedFolderPath()) {
         <div class="col-fixed">
-            <p-button icon="pi pi-trash" (click)="deleteProjectPath()" severity="danger"/>
+            <p-button icon="pi pi-trash" (click)="deleteProjectPath()" severity="danger" />
         </div>
         }
         <div class="col-fixed">
-            <p-button icon="pi pi-plus" (click)="openProjectDialog()"/>
+            <p-button icon="pi pi-plus" (click)="openProjectDialog()" />
         </div>
     </div>
     <div class="grid text-center mb-4">
         <div class="col-4">
             <div>No uncommitted changes</div>
             <div class="mt-3">
-                @if (repoStatus > 1) { <i class="pi pi-check"></i> }
-                @else if (repoStatus == 1) { <i class="pi pi-times"></i> }
+                @if (repoStatus() > 1) { <i class="pi pi-check"></i> }
+                @else if (repoStatus() == 1) { <i class="pi pi-times"></i> }
             </div>
         </div>
         <div class="col-4">
             <div>Branch up to date with remote</div>
             <div class="mt-3">
-                @if (repoStatus > 2) { <i class="pi pi-check"></i> }
-                @else if (repoStatus == 2) { <i class="pi pi-times"></i> }
+                @if (repoStatus() > 2) { <i class="pi pi-check"></i> }
+                @else if (repoStatus() == 2) { <i class="pi pi-times"></i> }
             </div>
         </div>
         <div class="col-4">
             <div>Permissions to push</div>
             <div class="mt-3">
-                @if (repoStatus > 3) { <i class="pi pi-check"></i> }
-                @else if (repoStatus == 3) { <i class="pi pi-times"></i> }
+                @if (repoStatus() > 3) { <i class="pi pi-check"></i> }
+                @else if (repoStatus() == 3) { <i class="pi pi-times"></i> }
             </div>
         </div>
     </div>
-    @if (versionFiles.length>0) {
-        <div class="grid justify-content-center mb-4">
-            <div class="col-fixed">
-                <p-selectButton [options]="bumpOptions" [(ngModel)]="selectedBumpOption"  optionLabel="label" optionValue="value" (onChange)="onPathChange(false)" />
-            </div>
+    @if (versionFiles().length>0) {
+    <div class="grid justify-content-center mb-4">
+        <div class="col-fixed">
+            <p-selectButton [options]="bumpOptions" [ngModel]="selectedBumpOption()"
+                (ngModelChange)="selectedBumpOption.set($event)" optionLabel="label" optionValue="value"
+                (onChange)="onPathChange(false)" />
         </div>
-        <div class="grid justify-content-center mb-4">
-            <div class="col-fixed" style="width: 400px;">
-                @if (versionFiles[0].type == htmlTypes.FileType.Gradle || versionFiles[0].type == htmlTypes.FileType.GradleKotlin) {
-                    <div class="grid">
-                        <div class="col-4">Version Code:</div>
-                        <div class="col">{{versionCode?.current}}</div>
-                        <div class="col">-></div>
-                        <div class="col">{{versionCode?.new}}</div>
-                    </div>
-                    <div class="grid">
-                        <div class="col-4">Version Name:</div>
-                        <div class="col">{{versionName?.current}}</div>
-                        <div class="col">-></div>
-                        <div class="col">{{versionName?.new}}</div>
-                    </div>
-                }
-                @if (versionFiles[0].type == htmlTypes.FileType.Package && versionFiles[1].type == htmlTypes.FileType.PackageLock) {
-                    <div class="grid">
-                        <div class="col-4">Version Code:</div>
-                        <div class="col">{{version?.current}}</div>
-                        <div class="col">-></div>
-                        <div class="col">{{version?.new}}</div>
-                    </div>
-                }
+    </div>
+    <div class="grid justify-content-center mb-4">
+        <div class="col-fixed" style="width: 400px;">
+            @if (versionFiles()[0].type == htmlTypes.FileType.Gradle || versionFiles()[0].type ==
+            htmlTypes.FileType.GradleKotlin) {
+            <div class="grid">
+                <div class="col-4">Version Code:</div>
+                <div class="col">{{versionCode()?.current}}</div>
+                <div class="col">-></div>
+                <div class="col">{{versionCode()?.new}}</div>
             </div>
-        </div>
-        <div class="grid justify-content-center mb-8">
-            <div class="col-fixed" style="width: 200px;">
-                <p-button label="Bump" [fluid]="true" (click)="bumpProject()" [disabled]="repoStatus != 5"  />
+            <div class="grid">
+                <div class="col-4">Version Name:</div>
+                <div class="col">{{versionName()?.current}}</div>
+                <div class="col">-></div>
+                <div class="col">{{versionName()?.new}}</div>
             </div>
-        </div>
-        <div class="grid justify-content-center">
-            <div class="col-fixed" style="width: 200px;">
-                <p-button severity="danger" label="Revert Previous" [fluid]="true" (click)="revert()" [disabled]="repoStatus != 5"/>
+            }
+            @if (versionFiles()[0].type == htmlTypes.FileType.Package && versionFiles()[1].type ==
+            htmlTypes.FileType.PackageLock) {
+            <div class="grid">
+                <div class="col-4">Version Code:</div>
+                <div class="col">{{version()?.current}}</div>
+                <div class="col">-></div>
+                <div class="col">{{version()?.new}}</div>
             </div>
+            }
         </div>
+    </div>
+    <div class="grid justify-content-center mb-8">
+        <div class="col-fixed" style="width: 200px;">
+            <p-button label="Bump" [fluid]="true" (click)="bumpProject()" [disabled]="repoStatus() != 5" />
+        </div>
+    </div>
+    <div class="grid justify-content-center">
+        <div class="col-fixed" style="width: 200px;">
+            <p-button severity="danger" label="Revert Previous" [fluid]="true" (click)="revert()"
+                [disabled]="repoStatus() != 5" />
+        </div>
+    </div>
     } @else {
-        <div class="grid justify-content-center mt-5">
-            <div class="col-fixed">
-                Add/Select a project
-            </div>
-        </div> 
+    <div class="grid justify-content-center mt-5">
+        <div class="col-fixed">
+            Add/Select a project
+        </div>
+    </div>
     }
 </div>

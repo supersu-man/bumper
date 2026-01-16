@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { BumpType } from '../../electron/enums';
 
 @Injectable({
@@ -8,6 +8,6 @@ export class StateService {
 
   constructor() { }
 
-  bump_type = BumpType.Patch
+  bump_type = signal(BumpType.Patch);
 
 }
